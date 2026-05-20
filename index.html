@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EBA 2025 — Culture & Safeguarding Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --ink:#0e1a2b;--ink2:#2c3e55;--ink3:#5a6a7e;--ink4:#8fa0b2;
+  --paper:#f4f6f9;--card:#fff;--border:#e2e8f0;--border2:#c8d4e0;
+  --navy:#0f2d4e;--navy-l:#e8f0f8;
+  --teal:#0e7a6e;--teal-l:#e0f5f2;--teal-m:#34a99b;
+  --gold:#b5730a;--gold-l:#fef5e4;--gold-m:#d4920d;
+  --red:#b91c1c;--red-l:#fef2f2;
+  --green:#166534;--green-l:#f0fdf4;
+  --violet:#5b21b6;--violet-l:#f5f3ff;
+  --r:8px;--R:14px;
+  --ff:'DM Sans',sans-serif;--ff-d:'Playfair Display',serif;--ff-m:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--ff);background:var(--paper);color:var(--ink);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--navy);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200;box-shadow:0 1px 0 rgba(255,255,255,.07)}
+.tb-l{display:flex;align-items:center;gap:10px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--teal-m);animation:pulse 2.5s ease-in-out infinite}
+.tb-title{font-family:var(--ff-d);font-size:16px;color:#fff;letter-spacing:-.2px}
+.tb-sub{font-size:10px;color:rgba(255,255,255,.4);margin-left:2px}
+.tb-r{display:flex;align-items:center;gap:10px}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 12px}
+.ldot{width:6px;height:6px;border-radius:50%;background:#facc15;flex-shrink:0}
+#live-status{font-size:11px;color:rgba(255,255,255,.7);font-family:var(--ff-m)}
+#last-refresh{font-size:10px;color:rgba(255,255,255,.28)}
+.tb-btn{height:28px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.7);font-size:11px;font-family:var(--ff);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.tb-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.tb-btn.on{background:var(--gold-m);border-color:var(--gold-m);color:#fff}
+#btn-csv{display:none}
+#btn-csv.show{display:flex;background:var(--teal);border-color:var(--teal);color:#fff}
+.admin-badge{display:none;align-items:center;gap:4px;background:var(--gold-l);border:1px solid var(--gold-m);color:var(--gold);font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px}
+.admin-badge.show{display:flex}
+
+/* FILTERS */
+.filterbar{background:#fff;border-bottom:1px solid var(--border);padding:8px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;position:sticky;top:54px;z-index:100}
+.fg{display:flex;align-items:center;gap:5px}
+.fg label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3)}
+.fg select,.fg input[type=date]{height:28px;padding:0 8px;border:1px solid var(--border2);border-radius:6px;font-family:var(--ff);font-size:11px;color:var(--ink);background:#fff;cursor:pointer;outline:none}
+.fg select:focus,.fg input[type=date]:focus{border-color:var(--teal-m);box-shadow:0 0 0 3px var(--teal-l)}
+.fdiv{width:1px;height:20px;background:var(--border)}
+.fcnt{background:var(--navy-l);color:var(--navy);font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;font-family:var(--ff-m);display:none}
+.rst-btn{height:28px;padding:0 12px;border:1px solid var(--border2);border-radius:6px;background:#fff;color:var(--ink3);font-size:11px;cursor:pointer;margin-left:auto;transition:all .15s}
+.rst-btn:hover{border-color:var(--teal-m);color:var(--teal)}
+.date-range-label{font-size:9px;color:var(--ink4);font-style:italic}
+
+/* KPI */
+.kpi-strip{background:var(--navy);display:grid;grid-template-columns:repeat(6,1fr);border-bottom:2px solid rgba(255,255,255,.05)}
+.kpi{padding:14px 16px;border-right:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,rgba(255,255,255,.15))}
+.kpi.ct{--kc:#34a99b}.kpi.cg{--kc:#22c55e}.kpi.cgo{--kc:#d4920d}.kpi.cr{--kc:#ef4444}.kpi.cv{--kc:#a78bfa}
+.kpi-v{font-size:26px;font-weight:700;color:#fff;line-height:1;letter-spacing:-1px;font-family:var(--ff-d)}
+.kpi-l{font-size:9px;color:rgba(255,255,255,.4);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.kpi-s{font-size:9px;margin-top:5px;font-family:var(--ff-m);color:rgba(255,255,255,.35)}
+
+/* LAYOUT */
+.page{padding:0 24px 40px}
+.sec{padding-top:22px}
+.sec-h{font-family:var(--ff-d);font-size:14px;color:var(--ink);font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
+.sec-h small{font-family:var(--ff);font-size:10px;font-weight:400;color:var(--ink4)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--R);padding:16px;overflow:hidden}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.ct_{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink2)}
+.cs_{font-size:10px;color:var(--ink4);margin-top:2px;font-weight:400;text-transform:none;letter-spacing:0}
+
+/* BADGES */
+.bdg{font-family:var(--ff);font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.3px}
+.b-warn{background:var(--red-l);border:1px solid #fca5a5;color:var(--red)}
+.b-info{background:var(--navy-l);color:var(--navy);border:1px solid #c3d5ea}
+.b-ok{background:var(--green-l);color:var(--green);border:1px solid #bbf7d0}
+.b-gold{background:var(--gold-l);color:var(--gold);border:1px solid #fde68a}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);padding:7px 10px;border-bottom:2px solid var(--border);text-align:left;white-space:nowrap;background:var(--paper)}
+.tbl th.r,.tbl td.r{text-align:right}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);font-size:11px;color:var(--ink2)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafbfc}
+.tbl td.b{font-weight:600;color:var(--ink)}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--ff-m)}
+.ch-h{background:var(--green-l);color:var(--green)}
+.ch-m{background:var(--gold-l);color:var(--gold)}
+.ch-l{background:var(--red-l);color:var(--red)}
+.ch-n{background:var(--paper);color:var(--ink4);border:1px solid var(--border)}
+
+/* QUESTION BARS */
+.qbar{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.qbar:last-child{border-bottom:none}
+.qbar-lbl{width:195px;flex-shrink:0}
+.qbar-lbl strong{font-size:10px;font-weight:600;color:var(--ink);display:block}
+.qbar-lbl small{font-size:9px;color:var(--ink4);display:block;margin-top:1px;line-height:1.3}
+.qbar-track{flex:1;height:20px;background:var(--paper);border-radius:4px;overflow:hidden}
+.qbar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:600;color:#fff;white-space:nowrap;transition:width .5s ease}
+.qbar-pct{font-family:var(--ff-m);font-size:11px;font-weight:600;width:40px;text-align:right;flex-shrink:0}
+.qbar-mean{font-size:10px;color:var(--ink4);font-family:var(--ff-m);width:40px;flex-shrink:0}
+
+/* INSIGHT BOXES */
+.ibox{border-radius:var(--r);padding:11px 13px;font-size:11px;line-height:1.7;border-left:3px solid}
+.ibox.strength{background:#f0fdf4;border-color:var(--green)}.ibox.concern{background:var(--red-l);border-color:var(--red)}.ibox.watch{background:var(--gold-l);border-color:var(--gold-m)}.ibox.info{background:var(--navy-l);border-color:var(--navy)}
+.ibox strong{font-size:9px;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:3px;color:inherit}
+.ibox p{color:var(--ink2);margin:0}
+
+/* THEME BARS */
+.tbr{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.tbr:last-child{border-bottom:none}
+.tdot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.tnm{font-size:11px;color:var(--ink2);width:155px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttrk{flex:1;background:var(--paper);border-radius:3px;height:14px;overflow:hidden}
+.tfil{height:100%;border-radius:3px;transition:width .4s ease}
+.tpct{font-size:10px;font-family:var(--ff-m);color:var(--ink4);width:38px;text-align:right;flex-shrink:0}
+.tcnt{font-size:10px;font-family:var(--ff-m);font-weight:600;color:var(--ink);width:28px;text-align:right;flex-shrink:0}
+
+/* QUAL CARDS — enhanced */
+.ql-list{max-height:310px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.ql-card{background:var(--paper);border-left:3px solid var(--teal-m);border-radius:0 6px 6px 0;padding:8px 10px;font-size:11px;color:var(--ink2);line-height:1.6;cursor:pointer;transition:background .15s}
+.ql-card:hover{background:#eef2f7}
+.ql-card .ql-quote{font-style:italic;color:var(--ink);font-size:11.5px;margin-bottom:5px}
+.ql-card .ql-meta{font-size:10px;color:var(--ink4);margin-bottom:4px}
+.ql-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.ql-tag{font-size:9px;background:#fff;border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--ink4);font-family:var(--ff-m)}
+.ql-sentiment{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;display:inline-block}
+.ql-sent-pos{background:#dcfce7;color:#166534}
+.ql-sent-neg{background:#fee2e2;color:#b91c1c}
+.ql-sent-neu{background:#f1f5f9;color:#64748b}
+.srch{width:100%;height:30px;padding:0 10px;border:1px solid var(--border2);border-radius:6px;font-family:var(--ff);font-size:11px;outline:none;margin-bottom:8px}
+.srch:focus{border-color:var(--teal-m);box-shadow:0 0 0 3px var(--teal-l)}
+.ql-count{font-size:10px;color:var(--ink4);margin-bottom:6px;font-family:var(--ff-m)}
+
+/* AI Insight Panel */
+.ai-panel{background:linear-gradient(135deg,#0f2d4e 0%,#0e3d5e 100%);border-radius:var(--R);padding:18px;color:#fff;position:relative;overflow:hidden}
+.ai-panel::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(52,169,155,.15)}
+.ai-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ai-icon{width:28px;height:28px;background:var(--teal-m);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ai-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,.8)}
+.ai-body{font-size:11.5px;line-height:1.8;color:rgba(255,255,255,.75)}
+.ai-body em{color:#4ade80;font-style:normal;font-weight:600}
+.ai-body mark{background:rgba(212,146,13,.25);color:#fde68a;padding:1px 4px;border-radius:3px;font-style:normal}
+.ai-loading{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.4);font-size:11px}
+.ai-spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--teal-m);border-radius:50%;animation:spin .8s linear infinite}
+.ai-btn{height:26px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:10px;font-family:var(--ff);cursor:pointer;transition:all .15s;margin-top:10px}
+.ai-btn:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* SUBMISSION PERFORMANCE */
+.perf-tabs{display:flex;gap:4px;margin-bottom:12px;background:var(--paper);border-radius:8px;padding:3px}
+.ptab{flex:1;height:26px;border-radius:6px;border:none;background:transparent;font-size:10px;font-family:var(--ff);font-weight:600;color:var(--ink4);cursor:pointer;transition:all .15s}
+.ptab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.perf-view{display:none}.perf-view.active{display:block}
+
+/* HEAT MAP */
+.heat-wrap{overflow-x:auto}
+.heat-tbl{border-collapse:collapse;font-size:10px}
+.heat-tbl th{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink4);padding:4px 8px;white-space:nowrap;font-weight:700}
+.heat-tbl td{padding:4px 8px;text-align:center;font-family:var(--ff-m);font-size:10px;min-width:44px}
+.heat-cell{border-radius:4px;padding:3px 6px;display:inline-block;min-width:32px}
+
+/* SAFEGUARDING */
+.sg-r{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.sg-r:last-child{border-bottom:none}
+.sg-l{font-size:11px;color:var(--ink2)}
+.sg-v{font-size:12px;font-weight:600;font-family:var(--ff-m)}
+
+/* REPORT */
+.report{background:var(--card);border:1px solid var(--border);border-radius:var(--R);padding:22px 26px}
+.rh{font-family:var(--ff-d);font-size:13px;color:var(--ink);font-weight:700;margin:16px 0 7px;padding-top:14px;border-top:1px solid var(--border)}
+.rh:first-child{border-top:none;margin-top:0;padding-top:0}
+.rp{font-size:12px;line-height:1.9;color:var(--ink2);margin-bottom:10px}
+.rp:last-child{margin-bottom:0}
+.rp em{color:var(--teal);font-style:normal;font-weight:600}
+.rp mark{background:var(--gold-l);color:var(--gold);padding:1px 4px;border-radius:3px}
+
+/* MODAL */
+.modal-wrap{position:fixed;inset:0;background:rgba(15,45,78,.72);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-wrap.show{display:flex}
+.modal{background:#fff;border-radius:var(--R);padding:28px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{font-family:var(--ff-d);font-size:17px;margin-bottom:6px}
+.modal p{font-size:11px;color:var(--ink3);margin-bottom:16px;line-height:1.6}
+.modal input{width:100%;height:36px;padding:0 12px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:var(--ff);outline:none;margin-bottom:10px}
+.modal input:focus{border-color:var(--teal-m)}
+.modal-btns{display:flex;gap:8px}
+.mbtn{flex:1;height:34px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-family:var(--ff);font-weight:600}
+.mbtn.p{background:var(--navy);color:#fff}
+.mbtn.s{background:var(--paper);color:var(--ink3);border:1px solid var(--border2)}
+.modal-err{font-size:11px;color:var(--red);margin-bottom:8px;display:none}
+
+/* LOADING */
+.overlay{position:fixed;inset:0;background:rgba(15,45,78,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:12px}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#34a99b;border-radius:50%;animation:spin .8s linear infinite}
+.ovl-t{font-size:13px;color:rgba(255,255,255,.7);font-family:var(--ff-m)}
+.ovl-s{font-size:10px;color:rgba(255,255,255,.3)}
+.err-bar{background:var(--red-l);border:1px solid #fca5a5;border-radius:var(--r);padding:10px 14px;font-size:11px;color:var(--red);margin:12px 24px 0;display:none}
+.err-bar.show{display:block}
+.empty{text-align:center;padding:24px;font-size:11px;color:var(--ink4);font-style:italic}
+
+/* FULL QUESTION TOOLTIP */
+.q-full{font-size:10px;color:var(--ink4);line-height:1.5;margin-top:6px;padding:8px;background:var(--paper);border-radius:6px}
+.q-full strong{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);margin-bottom:3px}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.85)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══ MOBILE / TABLET RESPONSIVE ═══════════════════════════════════════════ */
+@media(max-width:900px){
+  .kpi-strip{grid-template-columns:repeat(3,1fr)}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .topbar{padding:0 12px;height:auto;min-height:50px;flex-wrap:wrap;gap:6px;padding-top:8px;padding-bottom:8px}
+  .tb-l{flex-wrap:wrap;gap:6px}
+  .tb-r{flex-wrap:wrap;gap:6px;width:100%}
+  .tb-title{font-size:13px}
+  nav[style]{display:none!important}
+  .filterbar{top:0;position:relative;padding:10px 12px;gap:6px}
+  .fg{flex-direction:column;align-items:flex-start;gap:2px;flex:1 1 calc(50% - 6px)}
+  .fg label{font-size:9px}
+  .fg select,.fg input[type=date]{width:100%;height:32px;font-size:12px}
+  .fdiv{display:none}
+  .rst-btn{width:100%;margin:0;height:32px}
+  .page{padding:0 12px 30px}
+  .sec-h{font-size:13px}
+  .kpi-v{font-size:20px}
+  .kpi{padding:10px 12px}
+  .qbar{flex-wrap:wrap;gap:6px}
+  .qbar-lbl{width:100%}
+  .qbar-track{width:100%}
+  .tbl th,.tbl td{padding:6px 8px;font-size:10px}
+  .tbl th{font-size:8px}
+  .ql-list{max-height:260px}
+  .perf-tabs{flex-wrap:wrap}
+  .ptab{flex:1 1 calc(50% - 4px);height:30px;font-size:9px}
+  .g3.qual-grid{grid-template-columns:1fr}
+  .heat-tbl td,.heat-tbl th{padding:3px 5px;font-size:9px}
+  .ai-panel{padding:14px}
+  #last-refresh{display:none}
+  .tb-btn{height:26px;padding:0 8px;font-size:10px}
+}
+@media(max-width:480px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .fg{flex:1 1 100%}
+  .tb-r{justify-content:flex-start}
+  .ql-card .ql-quote{font-size:11px}
+  .venue-filter-row{flex-direction:column;gap:6px}
+  .vf-btn{width:100%;text-align:center}
+}
+
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="overlay" id="ovl">
+  <div class="spinner"></div>
+  <div class="ovl-t" id="ovl-msg">Connecting to live data…</div>
+  <div class="ovl-s">Fetching from Google Sheets · EBA 2025</div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-wrap" id="admin-modal">
+  <div class="modal">
+    <h3>🔐 Admin Access</h3>
+    <p>Enter the admin password to unlock CSV export and raw data controls.</p>
+    <div class="modal-err" id="modal-err">Incorrect password. Please try again.</div>
+    <input type="password" id="admin-pw" placeholder="Enter password…" onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="modal-btns">
+      <button class="mbtn s" onclick="closeModal()">Cancel</button>
+      <button class="mbtn p" onclick="checkPw()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-l">
+    <div class="pulse"></div>
+    <div>
+      <span class="tb-title">EBA 2025 — Culture &amp; Safeguarding Monitor</span>
+      <span class="tb-sub">/ Experience Educate</span>
+    </div>
+    <nav style="display:flex;gap:2px;margin-left:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px">
+      <a href="#" style="text-decoration:none;padding:4px 12px;border-radius:5px;font-size:11px;font-weight:600;background:rgba(255,255,255,.14);color:#fff;font-family:var(--ff)">📊 Dashboard</a>
+      <a href="#sec-qual" style="text-decoration:none;padding:4px 12px;border-radius:5px;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);font-family:var(--ff)" onmouseover="this.style.background='rgba(255,255,255,.1)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,.5)'">🔍 Qualitative Insights</a>
+    </nav>
+    <div class="admin-badge" id="adm-badge">⚙ Admin Mode</div>
+  </div>
+  <div class="tb-r">
+    <div class="live-pill">
+      <div class="ldot" id="ldot"></div>
+      <span id="live-status">Connecting…</span>
+    </div>
+    <span id="last-refresh"></span>
+    <button class="tb-btn" id="btn-csv" onclick="downloadCSV()">⬇ Download CSV</button>
+    <button class="tb-btn" id="btn-adm" onclick="openModal()">🔐 Admin</button>
+    <button class="tb-btn" onclick="loadLive()">↻ Refresh</button>
+  </div>
+</header>
+
+<!-- ERROR BAR -->
+<div class="err-bar" id="err-bar"></div>
+
+<!-- SETUP BANNER (shown only when URL is not configured) -->
+<div id="setup-banner" style="display:none;background:linear-gradient(90deg,#0f2d4e,#0e3d5e);color:#fff;padding:10px 24px;font-size:11px;line-height:1.8;border-bottom:2px solid var(--gold-m)">
+  <strong style="color:#fde68a">⚙ Setup Required:</strong>
+  The live data URL is not yet configured.
+  <strong>Step 1:</strong> Open your <a href="https://docs.google.com/spreadsheets/d/1w1BlA9HuuLD210MyFbsiG0tcwrh-sL2S__dXqKj7PMI/edit" target="_blank" style="color:#4ade80">Google Sheet</a> →
+  Extensions → Apps Script → paste the <strong>AppScript_EBA2025.gs</strong> code →
+  Deploy as Web App (access: <em>Anyone</em>) →
+  copy the URL.
+  <strong>Step 2:</strong> In this HTML file, replace <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px">PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE</code> with your Web App URL.
+</div>
+
+<!-- FILTERS -->
+<nav class="filterbar">
+  <div class="fg"><label>District</label><select id="fd" onchange="applyFilters()"><option value="">All Districts</option></select></div>
+  <div class="fdiv"></div>
+  <div class="fg"><label>Venue</label><select id="fv" onchange="applyFilters()"><option value="">All Venues</option></select></div>
+  <div class="fdiv"></div>
+  <div class="fg"><label>Role</label><select id="fr" onchange="applyFilters()"><option value="">All Roles</option></select></div>
+  <div class="fdiv"></div>
+  <div class="fg"><label>Week</label><select id="fw" onchange="applyFilters()"><option value="">All Weeks</option></select></div>
+  <div class="fdiv"></div>
+  <div class="fg">
+    <label>Date From</label>
+    <input type="date" id="fdate-from" onchange="applyFilters()">
+  </div>
+  <div class="fg">
+    <label>Date To</label>
+    <input type="date" id="fdate-to" onchange="applyFilters()">
+  </div>
+  <span class="fcnt" id="fcnt"></span>
+  <button class="rst-btn" onclick="resetFilters()">✕ Clear Filters</button>
+</nav>
+
+<!-- KPI STRIP -->
+<section class="kpi-strip">
+  <div class="kpi ct"><div class="kpi-v" id="kn">—</div><div class="kpi-l">Total Responses</div><div class="kpi-s" id="kn-s">&nbsp;</div></div>
+  <div class="kpi ct"><div class="kpi-v" id="kcs">—</div><div class="kpi-l">Avg Culture Score /25</div><div class="kpi-s" id="kcs-s">&nbsp;</div></div>
+  <div class="kpi cg"><div class="kpi-v" id="kpos">—</div><div class="kpi-l">% Scoring ≥ 20/25</div><div class="kpi-s">High or Very High band</div></div>
+  <div class="kpi cgo"><div class="kpi-v" id="kqhi">—</div><div class="kpi-l">Highest Dimension</div><div class="kpi-s" id="kqhi-l">&nbsp;</div></div>
+  <div class="kpi cr"><div class="kpi-v" id="kqlo">—</div><div class="kpi-l">Lowest Dimension</div><div class="kpi-s" id="kqlo-l">&nbsp;</div></div>
+  <div class="kpi cv"><div class="kpi-v" id="ksg">—</div><div class="kpi-l">Issues Logged</div><div class="kpi-s" id="ksg-s">&nbsp;</div></div>
+</section>
+
+<main class="page">
+
+<!-- S1: CULTURE DIMENSIONS -->
+<div class="sec">
+  <div class="sec-h">Culture Dimensions — Question Analysis <small>5 questions · scored 1 (low) to 5 (high)</small></div>
+  <div class="q-full">
+    <strong>Full Question Wording</strong>
+    Q1: To what extent did you feel the team valued your perspectives and feedback? &nbsp;|&nbsp;
+    Q2: How well did the team (PO, FOA, Trainer) anticipate and address challenges proactively this past week? &nbsp;|&nbsp;
+    Q3: Did you observe teammates taking initiative beyond their assigned roles to solve problems or support others? &nbsp;|&nbsp;
+    Q4: How comfortable did you feel expressing your ideas or concerns openly in this team? &nbsp;|&nbsp;
+    Q5: How willing was the team to adapt or change direction quickly when needed?
+  </div>
+  <div class="g2" style="margin-top:12px">
+    <div class="card">
+      <div class="ch"><div><div class="ct_">Q1–Q5 Mean Scores &amp; % Positive</div><div class="cs_">% positive = responses rated 4 or 5. Bar width = % positive respondents.</div></div></div>
+      <div id="qbars"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct_">Culture Score Distribution</div><div class="cs_">Count of respondents by score band (sum Q1–Q5, range 5–25). Benchmark: ≥20 = strong.</div></div></div>
+      <div style="position:relative;height:155px"><canvas id="c-dist"></canvas></div>
+      <div id="dist-leg" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:10px;color:var(--ink3)"></div>
+      <div id="dist-ins" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2: DISAGGREGATED PERFORMANCE -->
+<div class="sec">
+  <div class="sec-h">Disaggregated Performance <small>all breakdowns driven by live data</small></div>
+  <div class="g3">
+    <div class="card">
+      <div class="ch"><div class="ct_">By District</div></div>
+      <div id="t-dist" style="overflow-x:auto"></div>
+      <div id="dist-ins2" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">By Role <span class="bdg b-warn" style="margin-left:4px">No gender variable</span></div></div>
+      <div id="t-role" style="overflow-x:auto"></div>
+      <div id="role-ins" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">Weekly Culture Score Trend</div></div>
+      <div style="position:relative;height:160px"><canvas id="c-trend"></canvas></div>
+      <div id="trend-ins" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct_">Respondents by Role × Training Week</div><div class="cs_">Count of survey submissions per role-week combination. Total column shows overall responses per role.</div></div>
+      </div>
+      <div id="t-roleweek" style="overflow-x:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S3: SUBMISSION PERFORMANCE -->
+<div class="sec">
+  <div class="sec-h">Submission Performance <small>count of survey responses by dimension</small></div>
+  <div class="card">
+    <div class="perf-tabs">
+      <button class="ptab active" onclick="switchPerf('role',this)">By Role</button>
+      <button class="ptab" onclick="switchPerf('week',this)">By Week</button>
+      <button class="ptab" onclick="switchPerf('district',this)">By District</button>
+      <button class="ptab" onclick="switchPerf('venue',this)">By Venue</button>
+    </div>
+    <div id="perf-role" class="perf-view active"></div>
+    <div id="perf-week" class="perf-view"></div>
+    <div id="perf-district" class="perf-view"></div>
+    <div id="perf-venue" class="perf-view"></div>
+  </div>
+</div>
+
+<!-- S4: VENUE PERFORMANCE -->
+<div class="sec">
+  <div class="sec-h">Training Venue Performance <small>ranked by mean culture score · all venues from live data</small></div>
+  <div class="g2">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct_">Venues Ranked by Culture Score</div><div class="cs_">Minimum 1 response. Toggle to focus on top or bottom performers.</div></div>
+      </div>
+      <!-- Venue filter toggle -->
+      <div class="venue-filter-row" style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="vf-btn active" id="vf-all"  onclick="setVenueFilter('all',this)"  style="flex:1;min-width:70px;height:28px;border-radius:6px;border:1px solid var(--border2);background:var(--navy);color:#fff;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff)">All Venues</button>
+        <button class="vf-btn"        id="vf-top"  onclick="setVenueFilter('top',this)"  style="flex:1;min-width:70px;height:28px;border-radius:6px;border:1px solid var(--border2);background:#fff;color:var(--green);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff)">🏆 Top 10</button>
+        <button class="vf-btn"        id="vf-bot"  onclick="setVenueFilter('bot',this)"  style="flex:1;min-width:70px;height:28px;border-radius:6px;border:1px solid var(--border2);background:#fff;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff)">⚠ Bottom 10</button>
+        <span id="vf-legend" style="font-size:10px;color:var(--ink4);font-style:italic"></span>
+      </div>
+      <div id="t-venue" style="max-height:360px;overflow-y:auto"></div>
+      <div id="venue-ins" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">District × Role — Avg Culture Score</div></div>
+      <div id="t-cross" style="overflow-x:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S5: SAFEGUARDING -->
+<div class="sec">
+  <div class="sec-h">Safeguarding — Issue Escalation Tracking</div>
+  <div style="margin-bottom:10px" class="card" style="padding:10px 14px">
+    <div style="font-size:11px;color:var(--ink3);line-height:1.8">
+      <strong style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink2)">Survey Questions — Issue Escalation System</strong><br>
+      Please share your experience using the issue escalation system this week. &nbsp;|&nbsp;
+      Did you log or escalate any issue through the system this week? &nbsp;|&nbsp;
+      If yes, what type of issue did you mainly log or escalate? &nbsp;|&nbsp;
+      If you did not use the system this week, why not? &nbsp;|&nbsp;
+      What is one thing that would make the issue escalation system easier or more useful for you? &nbsp;|&nbsp;
+      Is there any issue you feel is not being captured or resolved well through the system?
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card">
+      <div class="ch"><div class="ct_">Overview</div></div>
+      <div id="sg-ovw"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">Issue Types Logged</div></div>
+      <div id="sg-types"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">Reasons Not Logged</div></div>
+      <div id="sg-reasons"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">⚠ Safeguarding Signal</div><span class="bdg b-warn">Action</span></div>
+      <div id="sg-ins"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: THEMATIC ANALYSIS -->
+<div class="sec">
+  <div class="sec-h">Thematic Analysis — Q6: Collaboration Improvements <small>keyword-coded · open-text responses</small></div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="ch"><div><div class="ct_">Theme Frequency</div><div class="cs_">Bar = % of action-coded responses. Number = total mentions. Positive/None excluded from % base.</div></div></div>
+      <div id="theme-bars"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct_">Theme Summary Table</div></div>
+      <div style="overflow-x:auto" id="theme-tbl"></div>
+      <div id="theme-ins" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div><div class="ct_">Theme by District</div><div class="cs_">Count of coded mentions per district</div></div></div>
+      <div id="theme-dist" style="overflow-x:auto"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct_">Theme by Training Week</div><div class="cs_">How themes shift across the bootcamp</div></div></div>
+      <div id="theme-week" style="overflow-x:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S7: QUALITATIVE INSIGHTS (enhanced) -->
+<div class="sec" id="sec-qual">
+  <div class="sec-h">Qualitative Insights Explorer <small>Q6 · Q7 · Q8 — AI-powered · sentiment-tagged · searchable</small></div>
+
+  <!-- AI Summary Panel -->
+  <div style="margin-bottom:14px">
+    <div class="ai-panel" id="ai-panel">
+      <div class="ai-header">
+        <div class="ai-icon">✦</div>
+        <span class="ai-title">AI Qualitative Analysis — Positives · Concerns · Recommendations</span>
+      </div>
+      <!-- AI tab switcher -->
+      <div style="display:flex;gap:4px;margin-bottom:10px;background:rgba(255,255,255,.07);border-radius:8px;padding:3px">
+        <button class="ai-tab active" id="ait-full"   onclick="switchAITab('full',this)"   style="flex:1;height:24px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:600;font-family:var(--ff);background:rgba(255,255,255,.18);color:#fff">Full Summary</button>
+        <button class="ai-tab"       id="ait-pos"    onclick="switchAITab('pos',this)"    style="flex:1;height:24px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:600;font-family:var(--ff);background:transparent;color:rgba(255,255,255,.5)">✅ Positives</button>
+        <button class="ai-tab"       id="ait-rec"    onclick="switchAITab('rec',this)"    style="flex:1;height:24px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:600;font-family:var(--ff);background:transparent;color:rgba(255,255,255,.5)">📋 Recommendations</button>
+        <button class="ai-tab"       id="ait-esc"    onclick="switchAITab('esc',this)"    style="flex:1;height:24px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:600;font-family:var(--ff);background:transparent;color:rgba(255,255,255,.5)">⚠ Escalation</button>
+      </div>
+      <div class="ai-body" id="ai-body">
+        <div class="ai-loading"><div class="ai-spin"></div>Waiting for data…</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+        <button class="ai-btn" onclick="runAISummary(true)">↻ Regenerate</button>
+        <span id="ai-meta" style="font-size:9px;color:rgba(255,255,255,.28);font-family:var(--ff-m)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Qual tabs (all 3 questions in one tabbed panel) -->
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;gap:4px;margin-bottom:12px;background:var(--paper);border-radius:8px;padding:3px">
+      <button class="qtab active" id="qt-q6" onclick="switchQTab('q6',this)" style="flex:1;height:28px;border-radius:6px;border:none;background:var(--card);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff);color:var(--teal);box-shadow:0 1px 3px rgba(0,0,0,.1)">Q6 — Collaboration</button>
+      <button class="qtab"        id="qt-q7" onclick="switchQTab('q7',this)" style="flex:1;height:28px;border-radius:6px;border:none;background:transparent;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff);color:var(--ink4)">Q7 — Escalation System</button>
+      <button class="qtab"        id="qt-q8" onclick="switchQTab('q8',this)" style="flex:1;height:28px;border-radius:6px;border:none;background:transparent;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--ff);color:var(--ink4)">Q8 — Unresolved Issues</button>
+    </div>
+
+    <!-- Sentiment filter + search row -->
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+      <input class="srch" id="sq-active" type="text" placeholder="Search responses…" oninput="rQualTabbed()" style="flex:1;min-width:180px;margin:0">
+      <div style="display:flex;gap:4px">
+        <button class="sf-btn active" id="sf-all" onclick="setSentFilter('all',this)" style="height:26px;padding:0 10px;border-radius:20px;border:1px solid var(--border2);background:var(--navy);color:#fff;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--ff)">All</button>
+        <button class="sf-btn" id="sf-pos" onclick="setSentFilter('pos',this)" style="height:26px;padding:0 10px;border-radius:20px;border:1px solid #bbf7d0;background:var(--green-l);color:var(--green);font-size:9px;font-weight:700;cursor:pointer;font-family:var(--ff)">✅ Positive</button>
+        <button class="sf-btn" id="sf-neg" onclick="setSentFilter('neg',this)" style="height:26px;padding:0 10px;border-radius:20px;border:1px solid #fca5a5;background:var(--red-l);color:var(--red);font-size:9px;font-weight:700;cursor:pointer;font-family:var(--ff)">⚠ Concern</button>
+      </div>
+      <span id="ql-count-active" style="font-size:10px;color:var(--ink4);font-family:var(--ff-m);white-space:nowrap"></span>
+    </div>
+
+    <!-- Active question description -->
+    <div id="ql-qdesc" style="font-size:11px;color:var(--ink4);margin-bottom:10px;padding:6px 10px;background:var(--paper);border-radius:6px;font-style:italic"></div>
+
+    <!-- Tabbed qual lists -->
+    <div id="qtab-q6" class="qtab-pane" style="display:block"><div class="ql-list" id="ql-q6"></div></div>
+    <div id="qtab-q7" class="qtab-pane" style="display:none"><div class="ql-list" id="ql-q7"></div></div>
+    <div id="qtab-q8" class="qtab-pane" style="display:none"><div class="ql-list" id="ql-q8"></div></div>
+  </div>
+</div>
+
+<!-- S8: ANALYTICAL REPORT -->
+<div class="sec">
+  <div class="sec-h">Analytical Report <small>auto-generated · updates with filters</small></div>
+  <div class="report" id="report"><div class="empty">Report will appear after data loads.</div></div>
+</div>
+
+</main>
+
+<script>
+// ════════════ CONFIG ════════════════════════════════════════════════════════
+const LIVE_URL   = 'https://script.google.com/macros/s/AKfycbzku9K7edOZUc0qWeTjoO16GdtEat9qfmKn9K7kAKr-w1ibIYgMVXA6-fbU33QwgvMg/exec';
+const ADMIN_PASS = 'EBA@2025';
+
+const Q_META = [
+  { k:'q1', short:'Team Values Feedback',        full:'To what extent did you feel the team valued your perspectives and feedback?' },
+  { k:'q2', short:'Proactive Challenge Handling', full:'How well did the team (PO, FOA, Trainer) anticipate and address challenges proactively this past week?' },
+  { k:'q3', short:'Initiative Taking',            full:'Did you observe teammates taking initiative beyond their assigned roles to solve problems or support others?' },
+  { k:'q4', short:'Comfort Expressing Ideas',     full:'How comfortable did you feel expressing your ideas or concerns openly in this team?' },
+  { k:'q5', short:'Team Adaptability',            full:'How willing was the team to adapt or change direction quickly when needed?' },
+];
+
+const ROLE_LABELS = { Trainer:'Trainer', FOA:'Field Ops Asst', PO:'Programme Officer', RT:'Rotational Trainer' };
+
+const THEME_COLORS = {
+  'Team Support':'#166534','Communication':'#0e7a6e','Time Management':'#b5730a',
+  'Materials & Resources':'#5b21b6','Training Quality':'#0e3b6e',
+  'Role Clarity':'#92400e','Youth Engagement':'#0891b2',
+  'Salary & Welfare':'#b91c1c','Other':'#64748b','Positive/None':'#8fa0b2'
+};
+const THEME_ORDER = ['Team Support','Communication','Time Management','Materials & Resources','Training Quality','Role Clarity','Youth Engagement','Salary & Welfare','Other','Positive/None'];
+const SKIP = new Set(['none','nothing','no','ok','okay','fine','good','great','na','n/a','nil','non','null','yes','thanks','test','testing']);
+
+// ════════════ STATE ══════════════════════════════════════════════════════════
+let ALL=[], FL=[];
+let IS_ADMIN=false;
+let cDist=null, cTrend=null;
+let AI_CACHE = {};
+
+// ════════════ UTILS ══════════════════════════════════════════════════════════
+const num  = v => (v===null||v===undefined||v===''||isNaN(+v))?null:+v;
+const avg  = (arr,k)=>{ const v=arr.map(r=>num(r[k])).filter(x=>x!==null); return v.length?v.reduce((a,b)=>a+b)/v.length:null; };
+const ppos = (arr,k)=>{ const v=arr.map(r=>num(r[k])).filter(x=>x!==null); return v.length?v.filter(x=>x>=4).length/v.length:null; };
+const f1   = v=>v===null||v===undefined?'—':v.toFixed(1);
+const fp   = v=>v===null||v===undefined?'—':Math.round(v*100)+'%';
+const ni   = v=>v===null||v===undefined?null:(String(v).trim()||null);
+const bCol = p=>p>=.85?'#166534':p>=.70?'#0e7a6e':p>=.50?'#b5730a':'#b91c1c';
+const set  = (id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+
+function chip(v,isQ){
+  if(v===null||v===undefined) return '<span class="chip ch-n">—</span>';
+  const c=isQ?(v>=4?'ch-h':v>=3.5?'ch-m':'ch-l'):(v>=22?'ch-h':v>=18?'ch-m':'ch-l');
+  return `<span class="chip ${c}">${f1(v)}</span>`;
+}
+function ibox(type,title,body){
+  return `<div class="ibox ${type}"><strong>${title}</strong><p>${body}</p></div>`;
+}
+
+// Simple keyword-based sentiment scorer
+function scoreSentiment(text){
+  if(!text) return 'neu';
+  const t = text.toLowerCase();
+  const pos = ['good','great','excellent','well','better','improv','strong','positive','effective','support','collaborat','help','team','together','appreciate','commend','satisfied','happy','progress'];
+  const neg = ['poor','bad','lack','fail','problem','issue','challeng','difficult','concern','delay','not','no ','never','absent','missing','unclear','confus','inadequate','frustrat','unhappy','neglect','weak'];
+  const ps = pos.filter(w=>t.includes(w)).length;
+  const ns = neg.filter(w=>t.includes(w)).length;
+  return ps>ns?'pos':ns>ps?'neg':'neu';
+}
+
+// ════════════ THEME CLASSIFIER ═══════════════════════════════════════════════
+const T_RULES=[
+  {t:'Time Management',       k:['time','transport','late','timely','early','delay','reimburse','punctual','schedule','on time','in time']},
+  {t:'Communication',         k:['communicat','meeting','feedback','update','inform','channel','share','message','site meeting','debrief']},
+  {t:'Team Support',          k:['team','support','together','collaborat','unity','cooperat','help','teamwork','collective','one team']},
+  {t:'Materials & Resources', k:['material','resource','power bank','supply','equipment','tablet','booklet','masking tape','marker','bangle','electricity']},
+  {t:'Training Quality',      k:['training','lesson','teach','facilit','class','content','workbook','curriculum','deliver']},
+  {t:'Role Clarity',          k:['role','responsib','job description','assign','clarity','clear role','designated','accountability']},
+  {t:'Youth Engagement',      k:['youth','learner','student','retention','absent','attendanc','mobiliz','participant']},
+  {t:'Salary & Welfare',      k:['salary','pay','facilitat','welfare','money','cash','allowance','remunerat','sapa','supper','accommodat']},
+];
+function classifyTheme(text){
+  if(!text) return null;
+  const t=text.toLowerCase();
+  const pos=['none','nothing','ok','okay','fine','good','great','excellent','na','n/a','nil','non','null','so far so good','all is well','not really','everything is fine'];
+  if(pos.some(s=>t.trim()===s||(t.trim().startsWith(s)&&t.length<s.length+5))) return 'Positive/None';
+  for(const {t:theme,k} of T_RULES){ if(k.some(kw=>t.includes(kw))) return theme; }
+  return 'Other';
+}
+
+// ════════════ DATA LOAD ═══════════════════════════════════════════════════════
+// The Apps Script returns objects with keys: dt,w,d,v,ro,q1–q5,cs,c6,il,it,nl,c7,c8
+// This normalise() maps those keys to internal dashboard keys and classifies themes.
+function normalise(data){
+  return data.map(r=>{
+    const q1=num(r.q1),q2=num(r.q2),q3=num(r.q3),q4=num(r.q4),q5=num(r.q5);
+    let cs=num(r.cs);
+    if(cs===null&&q1!==null&&q2!==null&&q3!==null&&q4!==null&&q5!==null) cs=q1+q2+q3+q4+q5;
+    const c6=ni(r.c6);
+    const ct=c6?classifyTheme(c6):null;
+    // Normalise district: uppercase, trim
+    const d=r.d?String(r.d).trim().toUpperCase():null;
+    // Normalise week: WEEK1, WEEK2 etc.
+    const w=r.w?String(r.w).trim().toUpperCase().replace(/\s+/g,''):null;
+    // Normalise role label
+    const ro=r.ro?String(r.ro).trim():null;
+    return{
+      dt:ni(r.dt), w, d,
+      v:ni(r.v)||'Not specified',
+      ro, q1,q2,q3,q4,q5,cs,
+      il:ni(r.il)?String(r.il).toLowerCase().trim():null,
+      it:ni(r.it), nl:ni(r.nl),
+      c6, c7:ni(r.c7), c8:ni(r.c8), ct
+    };
+  }).filter(r=>r.q1!==null||r.cs!==null);
+}
+
+async function loadLive(){
+  const ovl=document.getElementById('ovl');
+  const statusEl=document.getElementById('live-status');
+  const dotEl=document.getElementById('ldot');
+  if(ovl){ovl.style.display='flex'; document.getElementById('ovl-msg').textContent='Connecting to Google Sheets…';}
+  statusEl.textContent='Syncing…'; dotEl.style.background='#facc15'; statusEl.style.color='rgba(255,255,255,.7)';
+
+  const ctrl=new AbortController();
+  const timeout=setTimeout(()=>ctrl.abort(),20000);
+
+  try{
+    const url=LIVE_URL+'?t='+Date.now();
+    const res=await fetch(url,{signal:ctrl.signal,redirect:'follow'});
+    clearTimeout(timeout);
+    const raw=await res.text();
+    if(raw.trim().startsWith('<')) throw new Error('PERMISSION_ERROR');
+    let data;
+    try{ data=JSON.parse(raw); }
+    catch(e){ throw new Error('PARSE_ERROR:'+raw.slice(0,120)); }
+    if(data&&data.error) throw new Error('SCRIPT_ERROR:'+data.error);
+    if(!Array.isArray(data)||!data.length) throw new Error('EMPTY_RESPONSE');
+    initData(normalise(data));
+    statusEl.textContent='Live · '+data.length+' records';
+    statusEl.style.color='#4ade80'; dotEl.style.background='#22c55e';
+    document.getElementById('last-refresh').textContent='Updated '+new Date().toLocaleTimeString();
+    showErr(null);
+  }catch(err){
+    clearTimeout(timeout);
+    statusEl.textContent='Connection failed'; statusEl.style.color='#fb923c'; dotEl.style.background='#fb923c';
+    if(ovl) ovl.style.display='none';
+    let msg='', fix='';
+    const e=err.message||'';
+    if(err.name==='AbortError'||e.includes('abort')){
+      msg='Request timed out (20 s).';
+      fix='The endpoint is not responding. Verify the Apps Script is deployed and the URL is correct.';
+    } else if(e==='PERMISSION_ERROR'){
+      msg='Apps Script returned a login page instead of JSON data.';
+      fix='<strong>Fix in 3 steps:</strong><br>1. Open <a href="https://script.google.com" target="_blank">script.google.com</a> → your project<br>2. Click <strong>Deploy → Manage deployments</strong><br>3. Edit the deployment → set <strong>Who has access = Anyone</strong> (not "Anyone with Google account") → redeploy → copy the new URL.';
+    } else if(e==='EMPTY_RESPONSE'){
+      msg='Apps Script returned 0 rows — sheet may be empty or column mapping is wrong.';
+      fix='<strong>Fix:</strong> In the Apps Script editor, run <code>testGetData()</code> and <code>checkHeaders()</code>. Verify the sheet is named <strong>data</strong> and has the expected column headers.';
+    } else {
+      msg='Network error — '+e.slice(0,100);
+      fix='<strong>Most likely fix:</strong> <a href="'+LIVE_URL+'" target="_blank" style="color:var(--red)">Open endpoint URL in new tab</a>. If it returns JSON, the CORS policy is blocking the fetch.';
+    }
+    showErr('<strong>⚠ Live data failed:</strong> '+msg+'<div style="margin-top:8px;font-size:11px;line-height:1.7">'+fix+'</div><div style="margin-top:10px;display:flex;gap:10px;align-items:center"><a href="'+LIVE_URL+'" target="_blank" style="font-size:11px;font-weight:600;color:var(--red)">🔗 Test endpoint in new tab</a><button onclick="loadLive()" style="border:1px solid currentColor;border-radius:4px;padding:2px 10px;background:transparent;color:var(--red);cursor:pointer;font-size:11px;font-family:var(--ff)">↻ Retry</button></div>');
+  }
+}
+
+function showErr(html){
+  const e=document.getElementById('err-bar');
+  if(!e)return;
+  if(html){e.innerHTML=html;e.classList.add('show');e.style.display='block';}
+  else{e.classList.remove('show');e.style.display='none';}
+}
+
+// ════════════ INIT ════════════════════════════════════════════════════════════
+function initData(data){
+  ALL=data;
+  const uniq=(k,sortFn)=>{ const v=[...new Set(ALL.map(r=>r[k]).filter(Boolean))]; return sortFn?v.sort(sortFn):v.sort(); };
+  const wkSort=(a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,''));
+  pop('fd',uniq('d'));
+  pop('fw',uniq('w',wkSort));
+  pop('fr',uniq('ro'));
+  pop('fv',uniq('v'));
+  const dates=ALL.map(r=>r.dt).filter(Boolean).sort();
+  if(dates.length){
+    document.getElementById('fdate-from').value=dates[0].slice(0,10);
+    document.getElementById('fdate-to').value=dates[dates.length-1].slice(0,10);
+  }
+  FL=[...ALL];
+  // Initialise qual tab description
+  const qdesc=document.getElementById('ql-qdesc');
+  if(qdesc) qdesc.textContent=Q_DESCS['q6']||'';
+  renderAll();
+  document.getElementById('ovl').style.display='none';
+}
+
+function pop(id,vals){
+  const sel=document.getElementById(id);
+  const cur=sel.value,first=sel.options[0].outerHTML;
+  sel.innerHTML=first+vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+  if(vals.includes(cur)) sel.value=cur;
+}
+
+// ════════════ FILTERS ═════════════════════════════════════════════════════════
+function applyFilters(){
+  const d=document.getElementById('fd').value,w=document.getElementById('fw').value;
+  const r=document.getElementById('fr').value,v=document.getElementById('fv').value;
+  const df=document.getElementById('fdate-from').value;
+  const dt=document.getElementById('fdate-to').value;
+  FL=ALL.filter(x=>{
+    if(d&&x.d!==d) return false;
+    if(w&&x.w!==w) return false;
+    if(r&&x.ro!==r) return false;
+    if(v&&x.v!==v) return false;
+    if(df&&x.dt&&x.dt.slice(0,10)<df) return false;
+    if(dt&&x.dt&&x.dt.slice(0,10)>dt) return false;
+    return true;
+  });
+  const cnt=document.getElementById('fcnt');
+  const has=d||w||r||v||df||dt;
+  cnt.style.display=has?'inline':'none';
+  cnt.textContent=FL.length+' record'+(FL.length!==1?'s':'');
+  AI_CACHE={}; AI_STORE={};
+  renderAll();
+}
+function resetFilters(){
+  ['fd','fw','fr','fv'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fdate-from').value='';
+  document.getElementById('fdate-to').value='';
+  document.getElementById('fcnt').style.display='none';
+  AI_CACHE={}; AI_STORE={};
+  FL=[...ALL]; renderAll();
+}
+
+// ════════════ PERFORMANCE TABS ════════════════════════════════════════════════
+let curPerf='role';
+function switchPerf(tab, btn){
+  curPerf=tab;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.perf-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('perf-'+tab).classList.add('active');
+  rPerf();
+}
+
+function rPerf(){
+  rPerfBy('role','perf-role',r=>r.ro,ROLE_LABELS);
+  rPerfBy('week','perf-week',r=>r.w,null,true);
+  rPerfBy('district','perf-district',r=>r.d);
+  rPerfByVenue('perf-venue');
+}
+
+function rPerfBy(type,elId,keyFn,labelMap,isWeek){
+  const el=document.getElementById(elId);
+  const groups={};
+  FL.forEach(r=>{
+    const k=keyFn(r);
+    if(!k) return;
+    if(!groups[k]) groups[k]={n:0,cs:[],q1:[],q2:[],q3:[],q4:[],q5:[]};
+    groups[k].n++;
+    ['cs','q1','q2','q3','q4','q5'].forEach(f=>{if(r[f]!==null)groups[k][f].push(r[f]);});
+  });
+  let keys=Object.keys(groups);
+  if(isWeek) keys=keys.sort((a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,'')));
+  else keys=keys.sort((a,b)=>(groups[b].n-groups[a].n));
+  if(!keys.length){el.innerHTML='<div class="empty">No data</div>';return;}
+  const mx=Math.max(...keys.map(k=>groups[k].n));
+  el.innerHTML=`<table class="tbl">
+    <thead><tr><th>${type==='role'?'Role':type==='week'?'Week':type==='district'?'District':'Group'}</th><th class="r">Submissions</th><th>Share</th><th class="r">Avg Score</th><th class="r">Q1</th><th class="r">Q2</th><th class="r">Q3</th><th class="r">Q4</th><th class="r">Q5</th></tr></thead>
+    <tbody>${keys.map(k=>{
+      const g=groups[k];
+      const csAvg=g.cs.length?g.cs.reduce((a,b)=>a+b)/g.cs.length:null;
+      const pct=Math.round(100*g.n/FL.length);
+      const barW=Math.round(100*g.n/mx);
+      const barCol=csAvg>=22?'var(--green)':csAvg>=20?'var(--teal-m)':csAvg>=18?'var(--gold-m)':'var(--red)';
+      const qAvgs=['q1','q2','q3','q4','q5'].map(q=>g[q].length?g[q].reduce((a,b)=>a+b)/g[q].length:null);
+      return `<tr>
+        <td class="b">${(labelMap&&labelMap[k])||k}</td>
+        <td class="r" style="font-family:var(--ff-m);font-weight:700">${g.n}</td>
+        <td style="min-width:120px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1;background:var(--paper);border-radius:3px;height:12px;overflow:hidden">
+              <div style="width:${barW}%;height:100%;background:${barCol};border-radius:3px"></div>
+            </div>
+            <span style="font-size:10px;color:var(--ink4);font-family:var(--ff-m);width:28px">${pct}%</span>
+          </div>
+        </td>
+        <td class="r">${chip(csAvg,false)}</td>
+        ${qAvgs.map(q=>`<td class="r" style="font-size:10px;font-family:var(--ff-m);color:${q>=4?'var(--green)':q>=3.5?'var(--gold)':'var(--red)'}">${q?q.toFixed(1):'—'}</td>`).join('')}
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function rPerfByVenue(elId){
+  const el=document.getElementById(elId);
+  const vm={};
+  FL.forEach(r=>{
+    if(!r.v||r.v==='Not specified') return;
+    const k=r.v+(r.d?' ('+r.d+')':'');
+    if(!vm[k]) vm[k]={n:0,cs:[],d:r.d};
+    vm[k].n++; if(r.cs!==null) vm[k].cs.push(r.cs);
+  });
+  const vens=Object.entries(vm).sort((a,b)=>b[1].n-a[1].n);
+  if(!vens.length){el.innerHTML='<div class="empty">No venue data</div>';return;}
+  const mx=Math.max(...vens.map(([,v])=>v.n));
+  el.innerHTML=`<table class="tbl">
+    <thead><tr><th>#</th><th>Venue</th><th>District</th><th class="r">Submissions</th><th>Share</th><th class="r">Avg Score</th></tr></thead>
+    <tbody>${vens.map(([k,g],i)=>{
+      const csAvg=g.cs.length?g.cs.reduce((a,b)=>a+b)/g.cs.length:null;
+      const pct=Math.round(100*g.n/FL.length);
+      const barW=Math.round(100*g.n/mx);
+      return `<tr>
+        <td style="color:var(--ink4);font-family:var(--ff-m);font-size:10px">${i+1}</td>
+        <td class="b" style="max-width:180px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${k.replace(/ \(.+\)$/,'')}</td>
+        <td><span class="bdg b-info">${g.d||'—'}</span></td>
+        <td class="r" style="font-family:var(--ff-m);font-weight:700">${g.n}</td>
+        <td style="min-width:100px"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:var(--paper);border-radius:3px;height:12px;overflow:hidden"><div style="width:${barW}%;height:100%;background:var(--teal-m);border-radius:3px"></div></div><span style="font-size:10px;color:var(--ink4);font-family:var(--ff-m)">${pct}%</span></div></td>
+        <td class="r">${chip(csAvg,false)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+// ════════════ ROLE × WEEK TABLE ══════════════════════════════════════════════
+function rRoleWeek(){
+  const el=document.getElementById('t-roleweek');
+  const roles=[...new Set(FL.map(r=>r.ro).filter(Boolean))].sort();
+  const wks=[...new Set(FL.map(r=>r.w).filter(Boolean))].sort((a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,'')));
+  if(!roles.length||!wks.length){el.innerHTML='<div class="empty">No data</div>';return;}
+  const cnt=(ro,w)=>FL.filter(r=>r.ro===ro&&(!w||r.w===w)).length;
+  const wkTotal=w=>FL.filter(r=>r.w===w).length;
+  const grand=FL.length;
+  const cellPct=(ro,w)=>{const sub=FL.filter(r=>r.ro===ro&&r.w===w&&r.cs!==null);return sub.length?Math.round(100*sub.filter(r=>r.cs>=20).length/sub.length):null;};
+  const hdr=`<thead><tr style="background:var(--paper)"><th>Role</th>${wks.map(w=>`<th class="r" colspan="2" style="text-align:center;border-left:1px solid var(--border)">${w}</th>`).join('')}<th class="r" style="border-left:2px solid var(--border2)">Total</th></tr>
+    <tr style="background:var(--paper);border-bottom:2px solid var(--border)"><th style="color:var(--ink4);font-size:9px"></th>${wks.map(()=>'<th class="r" style="font-size:9px;color:var(--ink4);font-weight:500;border-left:1px solid var(--border)">n</th><th class="r" style="font-size:9px;color:var(--ink4);font-weight:500">≥20</th>').join('')}<th class="r" style="border-left:2px solid var(--border2)"></th></tr></thead>`;
+  const body=roles.map((ro,ri)=>{
+    const rowTotal=cnt(ro,'');
+    const cells=wks.map(w=>{const n=cnt(ro,w);const p=cellPct(ro,w);const pColor=p===null?'var(--ink4)':p>=80?'var(--green)':p>=60?'#b5730a':'var(--red)';return`<td class="r" style="border-left:1px solid var(--border);font-family:var(--ff-m)">${n||'—'}</td><td class="r" style="font-size:10px;color:${pColor};font-family:var(--ff-m)">${p!==null?p+'%':'—'}</td>`;}).join('');
+    return`<tr style="${ri%2===0?'':'background:#fafbfc'}"><td class="b">${ROLE_LABELS[ro]||ro}</td>${cells}<td class="r" style="border-left:2px solid var(--border2);font-weight:700;font-family:var(--ff-m)">${rowTotal}</td></tr>`;
+  }).join('');
+  const totCells=wks.map(w=>`<td class="r" style="border-left:1px solid var(--border);font-weight:700;font-family:var(--ff-m)">${wkTotal(w)}</td><td class="r" style="font-size:10px;color:var(--ink4)"></td>`).join('');
+  const footer=`<tr style="background:var(--paper);border-top:2px solid var(--border2)"><td class="b" style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3)">All Roles</td>${totCells}<td class="r" style="border-left:2px solid var(--border2);font-weight:700;font-family:var(--ff-m)">${grand}</td></tr>`;
+  el.innerHTML=`<table class="tbl">${hdr}<tbody>${body}${footer}</tbody></table>`;
+}
+
+// ════════════ RENDER ALL ══════════════════════════════════════════════════════
+function renderAll(){
+  rKPI(); rQBars(); rDistChart(); rDistTable(); rRoleTable(); rRoleWeek();
+  rTrend(); rVenue(); rCross(); rSG(); rThemes(); rQual(); rReport(); rPerf();
+  runAISummary(false);
+}
+
+// ════════════ KPI ═════════════════════════════════════════════════════════════
+function rKPI(){
+  const n=FL.length;
+  const csA=avg(FL,'cs');
+  const csv=FL.map(r=>r.cs).filter(x=>x!==null);
+  const p20=csv.length?Math.round(100*csv.filter(x=>x>=20).length/csv.length):0;
+  const qA=Q_META.map(q=>({...q,a:avg(FL,q.k)})).filter(x=>x.a!==null);
+  const qH=qA.length?qA.reduce((a,b)=>a.a>b.a?a:b):null;
+  const qL=qA.length?qA.reduce((a,b)=>a.a<b.a?a:b):null;
+  const sgA=FL.filter(r=>r.il!=null),sgY=sgA.filter(r=>r.il==='yes');
+  set('kn',n.toLocaleString());
+  set('kn-s',[...new Set(FL.map(r=>r.d).filter(Boolean))].length+' districts · '+[...new Set(FL.map(r=>r.v).filter(v=>v!=='Not specified'))].length+' venues');
+  set('kcs',f1(csA));
+  set('kcs-s',(csA?(csA/25*100).toFixed(1)+'% of max possible score':'—'));
+  document.getElementById('kcs').style.color=csA>=22?'#4ade80':csA>=20?'#facc15':'#f87171';
+  set('kpos',p20+'%');
+  set('kqhi',f1(qH?.a));
+  set('kqhi-l',qH?.short||'—');
+  set('kqlo',f1(qL?.a));
+  set('kqlo-l',qL?.short||'—');
+  set('ksg',sgA.length?sgY.length+'/'+sgA.length:'—');
+  set('ksg-s',sgA.length?Math.round(100*sgA.length/n)+'% completion rate':'No safeguarding responses');
+}
+
+// ════════════ QUESTION BARS ═══════════════════════════════════════════════════
+function rQBars(){
+  const el=document.getElementById('qbars'); el.innerHTML='';
+  Q_META.forEach(q=>{
+    const m=avg(FL,q.k),p=ppos(FL,q.k);
+    if(m===null) return;
+    const pct=Math.round((p||0)*100),col=bCol(p||0);
+    el.innerHTML+=`<div class="qbar">
+      <div class="qbar-lbl"><strong>${q.short}</strong><small>${q.full}</small></div>
+      <div class="qbar-track"><div class="qbar-fill" style="width:${pct}%;background:${col}">${pct}% positive</div></div>
+      <div class="qbar-pct" style="color:${col}">${pct}%</div>
+      <div class="qbar-mean">${f1(m)}/5</div>
+    </div>`;
+  });
+}
+
+// ════════════ DISTRIBUTION CHART ══════════════════════════════════════════════
+function rDistChart(){
+  const labs=['5–9','10–14','15–19','20–22','23–25'];
+  const lbls=['Very Low','Low','Moderate','High','Very High'];
+  const rngs=[[5,9],[10,14],[15,19],[20,22],[23,25]];
+  const cols=['#ef4444','#fb923c','#facc15','#4ade80','#166534'];
+  const vs=FL.map(r=>r.cs).filter(x=>x!==null);
+  const cnts=rngs.map(([lo,hi])=>vs.filter(x=>x>=lo&&x<=hi).length);
+  const tot=vs.length||1;
+  if(cDist) cDist.destroy();
+  cDist=new Chart(document.getElementById('c-dist'),{type:'bar',
+    data:{labels:labs,datasets:[{data:cnts,backgroundColor:cols,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} respondents (${Math.round(100*c.raw/tot)}%)`}}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:9,family:'DM Mono'}}},
+              x:{grid:{display:false},ticks:{font:{size:9}}}}}});
+  document.getElementById('dist-leg').innerHTML=lbls.map((l,i)=>`<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;background:${cols[i]};border-radius:2px;flex-shrink:0"></span><span>${l}: ${cnts[i]} (${Math.round(100*cnts[i]/tot)}%)</span></span>`).join('');
+  const hi=cnts[3]+cnts[4],lo=cnts[0]+cnts[1];
+  const type=hi/tot>=.7?'strength':lo/tot>.2?'concern':'watch';
+  document.getElementById('dist-ins').innerHTML=ibox(type,'Score Distribution Signal',
+    type==='strength'?`${Math.round(100*hi/tot)}% of respondents score in the High or Very High band (≥20/25), indicating strong overall team culture.`:
+    type==='concern'?`${Math.round(100*lo/tot)}% score below 15/25. Investigate specific sites or roles driving low scores.`:
+    `${Math.round(100*hi/tot)}% score 20+ while ${Math.round(100*lo/tot)}% fall below 15. Mixed profile — coaching attention recommended.`);
+}
+
+// ════════════ DISTRICT TABLE ══════════════════════════════════════════════════
+function rDistTable(){
+  const dists=[...new Set(FL.map(r=>r.d).filter(Boolean))].sort();
+  if(!dists.length){document.getElementById('t-dist').innerHTML='<div class="empty">No district data</div>';return;}
+  const rows=dists.map(d=>{const s=FL.filter(r=>r.d===d);return{d,n:s.length,...Object.fromEntries(Q_META.map(q=>[q.k,avg(s,q.k)])),cs:avg(s,'cs')};}).sort((a,b)=>(b.cs||0)-(a.cs||0));
+  const hdr=`<thead><tr><th>District</th><th class="r">N</th>${Q_META.map((_,i)=>`<th class="r">Q${i+1}</th>`).join('')}<th class="r">Score</th><th class="r">#</th></tr></thead>`;
+  const body=rows.map((r,i)=>`<tr><td class="b">${r.d}</td><td class="r">${r.n}</td>${Q_META.map(q=>`<td class="r">${f1(r[q.k])}</td>`).join('')}<td class="r">${chip(r.cs,false)}</td><td class="r" style="color:var(--ink4);font-family:var(--ff-m)">#${i+1}</td></tr>`).join('');
+  document.getElementById('t-dist').innerHTML=`<table class="tbl">${hdr}<tbody>${body}</tbody></table>`;
+  if(rows.length>=2){
+    const b=rows[0],w=rows[rows.length-1],gap=((b.cs||0)-(w.cs||0)).toFixed(2);
+    document.getElementById('dist-ins2').innerHTML=ibox(+gap>2?'concern':'info','District Gap',
+      `${b.d} leads at ${f1(b.cs)}/25. ${w.d} scores lowest at ${f1(w.cs)}/25 — a gap of ${gap} points.${+gap>2?' Targeted coaching visit to '+w.d+' is recommended.':' Performance is relatively consistent across districts.'}`);
+  }
+}
+
+// ════════════ ROLE TABLE ══════════════════════════════════════════════════════
+function rRoleTable(){
+  const roles=[...new Set(FL.map(r=>r.ro).filter(Boolean))].sort();
+  if(!roles.length){document.getElementById('t-role').innerHTML='<div class="empty">No role data</div>';return;}
+  const rows=roles.map(ro=>{const s=FL.filter(r=>r.ro===ro);return{ro,lbl:ROLE_LABELS[ro]||ro,n:s.length,...Object.fromEntries(Q_META.map(q=>[q.k,avg(s,q.k)])),cs:avg(s,'cs')};}).sort((a,b)=>(b.cs||0)-(a.cs||0));
+  const hdr=`<thead><tr><th>Role</th><th class="r">N</th>${Q_META.map((_,i)=>`<th class="r">Q${i+1}</th>`).join('')}<th class="r">Score</th></tr></thead>`;
+  const body=rows.map(r=>`<tr><td class="b">${r.lbl}</td><td class="r">${r.n}</td>${Q_META.map(q=>`<td class="r">${f1(r[q.k])}</td>`).join('')}<td class="r">${chip(r.cs,false)}</td></tr>`).join('');
+  document.getElementById('t-role').innerHTML=`<table class="tbl">${hdr}<tbody>${body}</tbody></table>`;
+  const po=rows.find(r=>r.ro==='PO');
+  if(po&&rows.length>1&&(po.cs||0)<(rows[0].cs||0)-1.5){
+    document.getElementById('role-ins').innerHTML=ibox('concern','PO Alert',`Programme Officers score ${f1(po.cs)}/25 — below the field team average. Investigate and provide additional support.`);
+  } else {
+    document.getElementById('role-ins').innerHTML=ibox('info','Note','No gender variable in this instrument. Role is used as a disaggregation proxy. Add a gender field before next data collection.');
+  }
+}
+
+// ════════════ WEEKLY TREND ════════════════════════════════════════════════════
+function rTrend(){
+  const wks=[...new Set(FL.map(r=>r.w).filter(Boolean))].sort((a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,'')));
+  const pts=wks.map(w=>{const s=FL.filter(r=>r.w===w);return{w,m:avg(s,'cs'),n:s.length};}).filter(p=>p.m!==null);
+  if(cTrend) cTrend.destroy();
+  cTrend=new Chart(document.getElementById('c-trend'),{type:'line',
+    data:{labels:pts.map(p=>p.w),datasets:[{label:'Culture Score',data:pts.map(p=>+p.m.toFixed(2)),
+      borderColor:'#0e7a6e',backgroundColor:'rgba(14,122,110,.08)',borderWidth:2.5,fill:true,tension:.4,
+      pointRadius:5,pointBackgroundColor:'#0e7a6e',pointBorderColor:'#fff',pointBorderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Score: ${c.raw} (n=${pts[c.dataIndex]?.n})`}}},
+      scales:{y:{min:15,max:25,grid:{color:'rgba(0,0,0,.04)'},ticks:{stepSize:2,font:{size:9,family:'DM Mono'}}},
+              x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  if(pts.length>=2){
+    const d=pts[pts.length-1].m-pts[0].m;
+    document.getElementById('trend-ins').innerHTML=ibox(d>=0?'strength':'concern','Trend',
+      `Scores moved ${d>=0?'up':'down'} ${Math.abs(d).toFixed(2)} pts from ${pts[0].w} (${f1(pts[0].m)}) to ${pts[pts.length-1].w} (${f1(pts[pts.length-1].m)}).`);
+  }
+}
+
+// ════════════ VENUE TABLE + TOP/BOTTOM FILTER ════════════════════════════════
+let venueFilter='all';
+function setVenueFilter(mode,btn){
+  venueFilter=mode;
+  document.querySelectorAll('.vf-btn').forEach(b=>{
+    b.style.background='#fff'; b.style.color='var(--ink3)';
+  });
+  btn.style.background=mode==='top'?'var(--green)':mode==='bot'?'var(--red)':'var(--navy)';
+  btn.style.color='#fff';
+  rVenue();
+}
+
+function rVenue(){
+  const vm={};
+  FL.forEach(r=>{
+    if(!r.v||r.v==='Not specified') return;
+    if(!vm[r.v]) vm[r.v]={n:0,cs:[],d:r.d};
+    vm[r.v].n++;
+    if(r.cs!==null) vm[r.v].cs.push(r.cs);
+  });
+  const allVens=Object.entries(vm)
+    .map(([v,d])=>({v,n:d.n,m:d.cs.length?d.cs.reduce((a,b)=>a+b)/d.cs.length:null,d:d.d}))
+    .filter(v=>v.m!==null)
+    .sort((a,b)=>(b.m||0)-(a.m||0));
+
+  let vens=allVens;
+  const lgEl=document.getElementById('vf-legend');
+  if(venueFilter==='top'){
+    vens=allVens.slice(0,10);
+    if(lgEl) lgEl.textContent=`Showing top ${vens.length} of ${allVens.length} venues`;
+  } else if(venueFilter==='bot'){
+    vens=allVens.slice(-10).reverse();
+    if(lgEl) lgEl.textContent=`Showing bottom ${vens.length} of ${allVens.length} venues`;
+  } else {
+    if(lgEl) lgEl.textContent=`${allVens.length} venues total`;
+  }
+
+  const hdr=`<thead><tr><th>#</th><th>Venue</th><th>District</th><th class="r">N</th><th class="r">Score</th><th class="r">Band</th></tr></thead>`;
+  const body=vens.map((v,i)=>{
+    const rank=venueFilter==='bot'?(allVens.length-vens.length+i+1):(venueFilter==='top'?i+1:allVens.indexOf(v)+1);
+    const band=v.m>=23?'🏆 High':v.m>=20?'✅ Good':v.m>=17?'⚠ Watch':'🔴 Low';
+    const bandCol=v.m>=23?'var(--green)':v.m>=20?'var(--teal)':v.m>=17?'var(--gold)':'var(--red)';
+    const rowBg=venueFilter==='top'&&i<3?'background:rgba(22,101,52,.04);':'';
+    const rowBgBot=venueFilter==='bot'&&i<3?'background:rgba(185,28,28,.04);':'';
+    return`<tr style="${rowBg||rowBgBot}">
+      <td style="color:var(--ink4);font-family:var(--ff-m);font-size:10px">${rank}</td>
+      <td class="b" style="max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis" title="${v.v}">${v.v}</td>
+      <td><span class="bdg b-info">${v.d||'—'}</span></td>
+      <td class="r" style="font-family:var(--ff-m)">${v.n}</td>
+      <td class="r">${chip(v.m,false)}</td>
+      <td class="r" style="font-size:10px;font-weight:600;color:${bandCol};white-space:nowrap">${band}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('t-venue').innerHTML=vens.length
+    ?`<table class="tbl">${hdr}<tbody>${body}</tbody></table>`
+    :'<div class="empty">No venue data</div>';
+
+  if(allVens.length){
+    const hi=allVens.filter(v=>v.m>=20).length;
+    const lo=allVens.filter(v=>v.m<17).length;
+    document.getElementById('venue-ins').innerHTML=
+      ibox(lo>0?'concern':'strength','Venue Performance Summary',
+        `<strong>${hi} of ${allVens.length} venues</strong> score 20+ (Good or High). `+
+        (lo>0?`<strong>${lo} venue${lo!==1?'s':''}</strong> score below 17 and need urgent attention. `:'All venues are above the watch threshold. ')+
+        `Top performer: <strong>${allVens[0].v}</strong> (${f1(allVens[0].m)}/25). `+
+        `Lowest: <strong>${allVens[allVens.length-1].v}</strong> (${f1(allVens[allVens.length-1].m)}/25). `+
+        `Use the Top 10 / Bottom 10 buttons to focus coaching resources.`);
+  }
+}
+
+// ════════════ CROSS TABLE ═════════════════════════════════════════════════════
+function rCross(){
+  const dists=[...new Set(FL.map(r=>r.d).filter(Boolean))].sort();
+  const roles=[...new Set(FL.map(r=>r.ro).filter(Boolean))].sort();
+  if(!dists.length||!roles.length){document.getElementById('t-cross').innerHTML='<div class="empty">Insufficient data</div>';return;}
+  const hdr=`<thead><tr><th>Role</th>${dists.map(d=>`<th class="r">${d}</th>`).join('')}</tr></thead>`;
+  const body=roles.map(ro=>`<tr><td class="b">${ROLE_LABELS[ro]||ro}</td>${dists.map(d=>{const s=FL.filter(r=>r.ro===ro&&r.d===d);return`<td class="r">${s.length?chip(avg(s,'cs'),false):'<span style="color:var(--ink4)">—</span>'}</td>`;}).join('')}</tr>`).join('');
+  document.getElementById('t-cross').innerHTML=`<table class="tbl">${hdr}<tbody>${body}</tbody></table>`;
+}
+
+// ════════════ SAFEGUARDING ════════════════════════════════════════════════════
+function rSG(){
+  const ans=FL.filter(r=>r.il!=null),yes=ans.filter(r=>r.il==='yes'),no=ans.filter(r=>r.il==='no');
+  const pct=FL.length?Math.round(100*ans.length/FL.length):0;
+  const row=(lbl,val,red)=>`<div class="sg-r"><span class="sg-l">${lbl}</span><span class="sg-v" style="${red?'color:var(--red)':''}">${val}</span></div>`;
+  document.getElementById('sg-ovw').innerHTML=
+    row('Total answered safeguarding section',`${ans.length} / ${FL.length} (${pct}%)`,pct<10)+
+    row('Logged an issue (Yes)',yes.length,yes.length>0)+
+    row('Did not log (No)',no.length);
+  const it={};yes.forEach(r=>{if(r.it)it[r.it]=(it[r.it]||0)+1;});
+  document.getElementById('sg-types').innerHTML=Object.keys(it).length
+    ?Object.entries(it).sort((a,b)=>b[1]-a[1]).map(([t,c])=>row(t,c,true)).join('')
+    :'<div class="empty">No issues logged</div>';
+  const nr={};no.forEach(r=>{if(r.nl)nr[r.nl]=(nr[r.nl]||0)+1;});
+  document.getElementById('sg-reasons').innerHTML=Object.keys(nr).length
+    ?Object.entries(nr).sort((a,b)=>b[1]-a[1]).map(([t,c])=>row(t,c)).join('')
+    :'<div class="empty">No reasons recorded</div>';
+  document.getElementById('sg-ins').innerHTML=pct<10
+    ?ibox('concern','⚠ Critical: Low Completion',`Only ${pct}% answered safeguarding. Make issue_logged a required field in SurveyCTO to capture system utilisation.`)
+    :yes.length>0?ibox('watch','Issues Logged',`${yes.length} issue${yes.length!==1?'s':''} logged. Ensure each has a named owner and resolution timeline.`)
+    :ibox('info','No Issues Logged',`${ans.length} answered with no issues logged. Cross-check with site supervisors to verify.`);
+}
+
+// ════════════ THEMATIC ANALYSIS ═══════════════════════════════════════════════
+function rThemes(){
+  const tm={};
+  FL.forEach(r=>{if(r.ct) tm[r.ct]=(tm[r.ct]||0)+1;});
+  const sorted=[...THEME_ORDER.filter(t=>tm[t]).map(t=>[t,tm[t]]),...Object.keys(tm).filter(t=>!THEME_ORDER.includes(t)).map(t=>[t,tm[t]])];
+  const totalCoded=sorted.reduce((a,b)=>a+b[1],0)||1;
+  const totalAct=sorted.filter(([t])=>t!=='Positive/None').reduce((a,b)=>a+b[1],0)||1;
+  const mx=sorted[0]?sorted[0][1]:1;
+  document.getElementById('theme-bars').innerHTML=sorted.map(([t,c])=>{
+    const col=THEME_COLORS[t]||'#64748b';
+    const pctA=t!=='Positive/None'?Math.round(100*c/totalAct):null;
+    return`<div class="tbr"><span class="tdot" style="background:${col}"></span><span class="tnm" title="${t}">${t}</span><div class="ttrk"><div class="tfil" style="width:${Math.round(100*c/mx)}%;background:${col}"></div></div><span class="tpct">${pctA!==null?pctA+'%':''}</span><span class="tcnt">${c}</span></div>`;
+  }).join('')||'<div class="empty">No theme data</div>';
+  const quotes={};
+  FL.forEach(r=>{if(r.ct&&r.c6&&r.c6.length>15&&!quotes[r.ct])quotes[r.ct]=r.c6.slice(0,110)+(r.c6.length>110?'…':'');});
+  const hdr=`<thead><tr><th>Theme</th><th class="r">Count</th><th class="r">% All</th><th class="r">% Action</th><th>Sample Response</th></tr></thead>`;
+  const body=sorted.map(([t,c])=>{
+    const col=THEME_COLORS[t]||'#64748b';
+    return`<tr><td class="b" style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:${col};flex-shrink:0;display:inline-block"></span>${t}</td><td class="r">${c}</td><td class="r">${(100*c/totalCoded).toFixed(1)}%</td><td class="r">${t!=='Positive/None'?(100*c/totalAct).toFixed(1)+'%':'—'}</td><td style="font-size:10px;color:var(--ink4);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${quotes[t]||''}">${quotes[t]||'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('theme-tbl').innerHTML=sorted.length?`<table class="tbl">${hdr}<tbody>${body}</tbody></table>`:'<div class="empty">No data</div>';
+  if(sorted.length){
+    const top3=sorted.slice(0,3).map(([t,c])=>`<strong>${t}</strong> (${c})`).join(', ');
+    document.getElementById('theme-ins').innerHTML=ibox('info','Top Themes',`Top themes: ${top3}. These are the highest-leverage areas for programmatic attention.`);
+  }
+  const dists=[...new Set(FL.map(r=>r.d).filter(Boolean))].sort();
+  const actThemes=sorted.filter(([t])=>t!=='Positive/None').slice(0,7);
+  if(actThemes.length&&dists.length){
+    const dhdr=`<thead><tr><th>Theme</th>${dists.map(d=>`<th class="r">${d}</th>`).join('')}<th class="r">Total</th></tr></thead>`;
+    const dbody=actThemes.map(([t,tot])=>`<tr><td class="b">${t}</td>${dists.map(d=>{const c=FL.filter(r=>r.d===d&&r.ct===t).length;return`<td class="r" style="color:${c>4?'var(--ink)':'var(--ink4)'}">${c||'—'}</td>`;}).join('')}<td class="r">${tot}</td></tr>`).join('');
+    document.getElementById('theme-dist').innerHTML=`<table class="tbl">${dhdr}<tbody>${dbody}</tbody></table>`;
+  }else{document.getElementById('theme-dist').innerHTML='<div class="empty">Insufficient data</div>';}
+  const wks=[...new Set(FL.map(r=>r.w).filter(Boolean))].sort((a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,'')));
+  if(actThemes.length&&wks.length){
+    const whdr=`<thead><tr><th>Theme</th>${wks.map(w=>`<th class="r">${w}</th>`).join('')}<th class="r">Total</th></tr></thead>`;
+    const wbody=actThemes.map(([t,tot])=>`<tr><td class="b">${t}</td>${wks.map(w=>{const c=FL.filter(r=>r.w===w&&r.ct===t).length;return`<td class="r" style="color:${c>4?'var(--ink)':'var(--ink4)'}">${c||'—'}</td>`;}).join('')}<td class="r">${tot}</td></tr>`).join('');
+    document.getElementById('theme-week').innerHTML=`<table class="tbl">${whdr}<tbody>${wbody}</tbody></table>`;
+  }else{document.getElementById('theme-week').innerHTML='<div class="empty">Insufficient data</div>';}
+}
+
+// ════════════ QUAL TABS STATE ═════════════════════════════════════════════════
+let activeQTab='q6', activeSentFilter='all';
+const Q_DESCS={
+  q6:'Q6 — What improvements can be made to enhance collaboration and the achievement of site performance?',
+  q7:'Q7 — What is one thing that would make the issue escalation system easier or more useful for you?',
+  q8:'Q8 — Is there any issue you feel is not being captured or resolved well through the system?'
+};
+function switchQTab(tab,btn){
+  activeQTab=tab;
+  document.querySelectorAll('.qtab').forEach(b=>{
+    b.style.background='transparent'; b.style.color='var(--ink4)'; b.style.boxShadow='none';
+  });
+  btn.style.background='var(--card)'; btn.style.color='var(--teal)'; btn.style.boxShadow='0 1px 3px rgba(0,0,0,.1)';
+  document.querySelectorAll('.qtab-pane').forEach(p=>p.style.display='none');
+  document.getElementById('qtab-'+tab).style.display='block';
+  document.getElementById('sq-active').value='';
+  document.getElementById('ql-qdesc').textContent=Q_DESCS[tab]||'';
+  rQualTabbed();
+}
+function setSentFilter(mode,btn){
+  activeSentFilter=mode;
+  document.querySelectorAll('.sf-btn').forEach(b=>{b.style.opacity='.55';});
+  btn.style.opacity='1';
+  rQualTabbed();
+}
+function rQualTabbed(){
+  ['q6','q7','q8'].forEach(field=>rQualField(field));
+}
+function rQualField(field){
+  const elId='ql-'+field;
+  const q=(field===activeQTab?(document.getElementById('sq-active')?.value||'').toLowerCase():'');
+  const col=field==='q6'?'var(--teal-m)':field==='q7'?'#5b21b6':'var(--red)';
+  const recs=FL.filter(r=>{
+    const v=ni(r[field]); if(!v||v.length<8) return false;
+    const vl=v.toLowerCase().trim();
+    if(SKIP.has(vl)) return false;
+    if(q&&!v.toLowerCase().includes(q)) return false;
+    if(field===activeQTab&&activeSentFilter!=='all'&&scoreSentiment(v)!==activeSentFilter) return false;
+    return true;
+  });
+  // Show count on active tab
+  if(field===activeQTab){
+    const cntEl=document.getElementById('ql-count-active');
+    if(cntEl){
+      const pos=recs.filter(r=>scoreSentiment(String(r[field]))==='pos').length;
+      const neg=recs.filter(r=>scoreSentiment(String(r[field]))==='neg').length;
+      const neu=recs.length-pos-neg;
+      cntEl.innerHTML=`<span style="color:var(--ink3)">${recs.length} response${recs.length!==1?'s':''}</span>&nbsp;&nbsp;<span style="color:var(--green)">✅ ${pos}</span>&nbsp;<span style="color:var(--red)">⚠ ${neg}</span>&nbsp;<span style="color:var(--ink4)">— ${neu}</span>`;
+    }
+  }
+  document.getElementById(elId).innerHTML=recs.length
+    ?recs.slice(0,60).map(r=>{
+        const txt=String(r[field]);
+        const tColor=r.ct&&field==='q6'?(THEME_COLORS[r.ct]||col):col;
+        const sent=scoreSentiment(txt);
+        const sentLbl=sent==='pos'?'Positive':sent==='neg'?'Concern':'Neutral';
+        const sentCls=sent==='pos'?'ql-sent-pos':sent==='neg'?'ql-sent-neg':'ql-sent-neu';
+        let display=txt.length>320?txt.slice(0,320)+'…':txt;
+        if(q&&q.length>1){
+          const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+          display=display.replace(re,'<mark style="background:#fef3c7;color:#92400e;border-radius:2px;font-style:normal">$1</mark>');
+        }
+        // Score bar (only for Q6 if cs available)
+        const scoreBar=r.cs!==null?`<div style="display:flex;align-items:center;gap:5px;margin-top:5px">
+          <div style="flex:1;background:var(--border);border-radius:3px;height:4px;overflow:hidden">
+            <div style="width:${(r.cs/25*100).toFixed(0)}%;height:100%;background:${r.cs>=22?'var(--green)':r.cs>=18?'var(--teal-m)':'var(--gold-m)'};border-radius:3px"></div>
+          </div>
+          <span style="font-size:9px;font-family:var(--ff-m);color:var(--ink4);white-space:nowrap">Score ${r.cs}/25</span>
+        </div>`:'';
+        return`<div class="ql-card" style="border-left-color:${tColor}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+            <span class="ql-sentiment ${sentCls}">${sentLbl}</span>
+            <span style="font-size:9px;color:var(--ink4);font-family:var(--ff-m)">${[r.ro,r.d,r.w].filter(Boolean).join(' · ')}</span>
+          </div>
+          <div class="ql-quote" style="font-size:12px;line-height:1.65">${display}</div>
+          ${scoreBar}
+          <div class="ql-tags" style="margin-top:5px">
+            ${r.ct&&field==='q6'?`<span class="ql-tag" style="background:${tColor}22;color:${tColor};border-color:${tColor}44">${r.ct}</span>`:''}
+            ${r.v&&r.v!=='Not specified'?`<span class="ql-tag">${r.v.length>26?r.v.slice(0,26)+'…':r.v}</span>`:''}
+          </div>
+        </div>`;
+      }).join('')
+    :'<div class="empty">No substantive responses match current filters.</div>';
+}
+// Legacy wrapper — kept so renderAll() still works
+function rQual(){ rQualTabbed(); }
+
+// ════════════ AI SUMMARY — multi-tab ══════════════════════════════════════════
+let AI_STORE = {}; // stores pos/rec/esc/full separately
+let activeAITab = 'full';
+function switchAITab(tab, btn){
+  activeAITab=tab;
+  document.querySelectorAll('.ai-tab').forEach(b=>{
+    b.style.background='transparent'; b.style.color='rgba(255,255,255,.5)';
+  });
+  btn.style.background='rgba(255,255,255,.18)'; btn.style.color='#fff';
+  const cacheKey=JSON.stringify({n:FL.length,d:[...new Set(FL.map(r=>r.d))].sort(),w:[...new Set(FL.map(r=>r.w))].sort()});
+  if(AI_STORE[cacheKey]&&AI_STORE[cacheKey][tab]){
+    document.getElementById('ai-body').innerHTML=AI_STORE[cacheKey][tab];
+  } else {
+    runAISummary(false);
+  }
+}
+
+// ════════════ AI SUMMARY ══════════════════════════════════════════════════════
+async function runAISummary(force){
+  const el=document.getElementById('ai-body');
+  if(!el) return;
+  if(!FL.length){el.innerHTML='<div class="ai-loading"><div class="ai-spin"></div>Waiting for data…</div>';return;}
+  const cacheKey=JSON.stringify({n:FL.length,d:[...new Set(FL.map(r=>r.d))].sort(),w:[...new Set(FL.map(r=>r.w))].sort()});
+  if(!force&&AI_STORE[cacheKey]&&AI_STORE[cacheKey][activeAITab]){
+    el.innerHTML=AI_STORE[cacheKey][activeAITab]; return;
+  }
+  el.innerHTML='<div class="ai-loading"><div class="ai-spin"></div>Generating AI analysis…</div>';
+
+  const q6s=FL.map(r=>r.c6).filter(t=>t&&t.length>10&&!SKIP.has(t.toLowerCase().trim())).slice(0,50);
+  const q7s=FL.map(r=>r.c7).filter(t=>t&&t.length>8).slice(0,30);
+  const q8s=FL.map(r=>r.c8).filter(t=>t&&t.length>8).slice(0,30);
+  const tm={};FL.forEach(r=>{if(r.ct)tm[r.ct]=(tm[r.ct]||0)+1;});
+  const topThemes=Object.entries(tm).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,c])=>`${t}(${c})`).join(', ');
+  const csA=avg(FL,'cs');
+  const dists=[...new Set(FL.map(r=>r.d).filter(Boolean))].sort();
+  const wks=[...new Set(FL.map(r=>r.w).filter(Boolean))].sort();
+  const sgA=FL.filter(r=>r.il!=null),sgY=sgA.filter(r=>r.il==='yes');
+  const q6pos=q6s.filter(t=>scoreSentiment(t)==='pos').slice(0,12);
+  const q6neg=q6s.filter(t=>scoreSentiment(t)==='neg').slice(0,12);
+
+  const prompts={
+    full:`You are a programme quality analyst for EBA 2025. Write a qualitative synthesis in 5 short paragraphs (plain text only, no markdown, no bullets). Cover: (1) what is working well with specific examples from the quotes, (2) dominant improvement themes and what they signal operationally, (3) concrete needs raised across Q6/Q7/Q8 — be specific about what respondents are asking for, (4) safeguarding and escalation system gaps, (5) three prioritised recommendations. Cite actual phrases from responses. Max 280 words.`,
+    pos:`You are a programme quality analyst. Based on the data below, write 3–4 short paragraphs (plain text only) specifically about WHAT IS WORKING WELL and the POSITIVE PRACTICES observed. Highlight team behaviours, collaboration wins, and cultural strengths that should be preserved and scaled. Be specific — cite actual phrases. Max 180 words.`,
+    rec:`You are a programme quality analyst. Based on the data below, write 5 clear RECOMMENDATIONS formatted as: "Recommendation [number]: [short title]. [2–3 sentence explanation with evidence from responses]." Number them 1–5. Use plain text only — no markdown. Be specific and actionable. Max 220 words.`,
+    esc:`You are a programme quality analyst. Based on the data below, write a focused analysis (3–4 short paragraphs, plain text only) on the ISSUE ESCALATION SYSTEM specifically. Cover: uptake rate, why people are not using it, what the Q7 responses reveal about usability, what Q8 reveals about unresolved issues, and what immediate fixes would improve the system. Cite actual quotes. Max 200 words.`
+  };
+
+  const context=`
+DATA: ${FL.length} respondents · Districts: ${dists.join(', ')} · Weeks: ${wks.join(', ')} · Avg culture score: ${f1(csA)}/25 · Top themes: ${topThemes}
+Issues logged: ${sgY.length}/${sgA.length} answered safeguarding section (${sgA.length?Math.round(100*sgA.length/FL.length)+'%':'0%'} completion)
+
+Q6 POSITIVE responses: ${q6pos.map((t,i)=>`[${i+1}] "${t}"`).join(' | ')}
+Q6 CONCERN responses: ${q6neg.map((t,i)=>`[${i+1}] "${t}"`).join(' | ')}
+Q6 ALL (sample): ${q6s.slice(0,20).map((t,i)=>`[${i+1}] "${t}"`).join(' | ')}
+Q7 (escalation feedback): ${q7s.slice(0,15).map((t,i)=>`[${i+1}] "${t}"`).join(' | ')}
+Q8 (unresolved issues): ${q8s.slice(0,15).map((t,i)=>`[${i+1}] "${t}"`).join(' | ')}`;
+
+  try{
+    const tab=activeAITab;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompts[tab]+'\n\n'+context}]
+      })
+    });
+    const data=await res.json();
+    const txt=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    if(!txt) throw new Error('empty');
+
+    // Format output by tab type
+    let html;
+    if(tab==='rec'){
+      // Number each recommendation as a distinct block
+      const parts=txt.split(/\n(?=Recommendation\s+\d)/i).filter(Boolean);
+      html=parts.map(p=>{
+        const m=p.match(/^(Recommendation\s+\d+[:\.]?\s*)(.+)/is);
+        if(m) return`<div style="margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:8px;border-left:3px solid var(--teal-m)"><span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal-m);display:block;margin-bottom:4px">${m[1].trim()}</span><p style="color:rgba(255,255,255,.8);font-size:11.5px;line-height:1.8;margin:0">${m[2].trim()}</p></div>`;
+        return`<p style="margin-bottom:10px;color:rgba(255,255,255,.75);font-size:11.5px;line-height:1.8">${p.trim()}</p>`;
+      }).join('');
+    } else if(tab==='pos'){
+      html=txt.split(/\n\n+/).filter(Boolean).map(p=>`<p style="margin-bottom:10px;color:rgba(255,255,255,.8);font-size:11.5px;line-height:1.8;padding-left:10px;border-left:2px solid #4ade80">${p.trim()}</p>`).join('');
+    } else if(tab==='esc'){
+      html=txt.split(/\n\n+/).filter(Boolean).map(p=>`<p style="margin-bottom:10px;color:rgba(255,255,255,.8);font-size:11.5px;line-height:1.8;padding-left:10px;border-left:2px solid #fb923c">${p.trim()}</p>`).join('');
+    } else {
+      html=txt.split(/\n\n+/).filter(Boolean).map(p=>`<p style="margin-bottom:10px;color:rgba(255,255,255,.75);font-size:11.5px;line-height:1.8">${p.trim()}</p>`).join('');
+    }
+
+    if(!AI_STORE[cacheKey]) AI_STORE[cacheKey]={};
+    AI_STORE[cacheKey][tab]=html;
+    AI_CACHE[cacheKey]=html; // keep legacy compat
+    el.innerHTML=html;
+    const meta=document.getElementById('ai-meta');
+    if(meta) meta.textContent=`Generated ${new Date().toLocaleTimeString()} · n=${FL.length}`;
+  }catch(e){
+    el.innerHTML=`<p style="color:rgba(255,255,255,.45);font-size:11px">AI summary unavailable. Qualitative responses are visible in the explorer below.</p>`;
+  }
+}
+
+// ════════════ ANALYTICAL REPORT ═══════════════════════════════════════════════
+function rReport(){
+  const n=FL.length;
+  if(!n){document.getElementById('report').innerHTML='<div class="empty">No data to report.</div>';return;}
+  const dists=[...new Set(FL.map(r=>r.d).filter(Boolean))].sort();
+  const wks=[...new Set(FL.map(r=>r.w).filter(Boolean))];
+  const ven=[...new Set(FL.map(r=>r.v).filter(v=>v&&v!=='Not specified'))];
+  const csA=avg(FL,'cs');
+  const csv=FL.map(r=>r.cs).filter(x=>x!==null);
+  const p20=csv.length?Math.round(100*csv.filter(x=>x>=20).length/csv.length):0;
+  const qA=Q_META.map(q=>({...q,a:avg(FL,q.k)})).filter(x=>x.a!==null);
+  const qH=qA.length?qA.reduce((a,b)=>a.a>b.a?a:b):null;
+  const qL=qA.length?qA.reduce((a,b)=>a.a<b.a?a:b):null;
+  const dR=dists.map(d=>({d,cs:avg(FL.filter(r=>r.d===d),'cs')})).filter(r=>r.cs!==null).sort((a,b)=>b.cs-a.cs);
+  const bD=dR[0],wD=dR[dR.length-1];
+  const sgA=FL.filter(r=>r.il!=null),sgY=sgA.filter(r=>r.il==='yes'),sgPct=Math.round(100*sgA.length/n);
+  const tm={};FL.forEach(r=>{if(r.ct&&r.ct!=='Positive/None')tm[r.ct]=(tm[r.ct]||0)+1;});
+  const topT=Object.entries(tm).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const wkD=wks.map(w=>({w,cs:avg(FL.filter(r=>r.w===w),'cs')})).filter(r=>r.cs!==null).sort((a,b)=>parseInt(a.w.replace(/\D/g,''))-parseInt(b.w.replace(/\D/g,'')));
+  const trend=wkD.length>=2?wkD[wkD.length-1].cs-wkD[0].cs:null;
+  // Submission stats
+  const roles=[...new Set(FL.map(r=>r.ro).filter(Boolean))];
+  const topRole=roles.map(ro=>({ro,n:FL.filter(r=>r.ro===ro).length})).sort((a,b)=>b.n-a.n)[0];
+
+  document.getElementById('report').innerHTML=`
+<div class="rh">1. Overview</div>
+<div class="rp">This report covers <em>${n.toLocaleString()} respondents</em> from <em>${dists.length} district${dists.length!==1?'s':''}</em> (${dists.join(', ')}), ${ven.length} training venues, and ${wks.length} week${wks.length!==1?'s':''} of data. The overall mean culture score is <em>${f1(csA)}/25.0</em> (${(csA/25*100).toFixed(1)}% of the maximum possible score), with <em>${p20}%</em> of respondents scoring in the High or Very High band (≥20/25). ${topRole?`The most represented role is <em>${ROLE_LABELS[topRole.ro]||topRole.ro}</em> (${topRole.n} responses, ${Math.round(100*topRole.n/n)}% of total).`:''}</div>
+
+<div class="rh">2. Culture Dimension Analysis</div>
+<div class="rp">Across the five culture dimensions, <mark>${qH?.short||'—'}</mark> is the strongest at <em>${f1(qH?.a)}/5</em>. The lowest dimension is <mark>${qL?.short||'—'}</mark> at <em>${f1(qL?.a)}/5</em> — a gap of ${f1((qH?.a||0)-(qL?.a||0))} points. ${(qH?.a||0)-(qL?.a||0)>0.5?'This uneven profile suggests targeted coaching is needed on '+qL?.short+'.':'The dimensions are broadly balanced, suggesting a consistent team culture profile.'}</div>
+
+${dR.length>=2?`<div class="rh">3. District Comparison</div>
+<div class="rp"><em>${bD?.d}</em> leads with ${f1(bD?.cs)}/25, while <em>${wD?.d}</em> scores lowest at ${f1(wD?.cs)}/25. ${+((bD?.cs||0)-(wD?.cs||0)).toFixed(2)>2?'The gap of '+((bD?.cs||0)-(wD?.cs||0)).toFixed(2)+' points is substantive. A targeted coaching intervention and site management review in '+wD?.d+' is strongly recommended.':'District performance is broadly consistent — the gap of '+((bD?.cs||0)-(wD?.cs||0)).toFixed(2)+' points does not suggest structural inequality.'}</div>`:''}
+
+${trend!==null?`<div class="rh">4. Weekly Trend</div>
+<div class="rp">Culture scores show <em>${trend>=0?'positive growth':'a decline'}</em> of <em>${Math.abs(trend).toFixed(2)} points</em> from ${wkD[0]?.w} (${f1(wkD[0]?.cs)}) to ${wkD[wkD.length-1]?.w} (${f1(wkD[wkD.length-1]?.cs)}). ${trend>=1?'This upward trajectory suggests improving team cohesion and programme adaptation.':trend<-0.5?'This decline warrants attention — review site management, workload, and welfare conditions.':'Scores are broadly stable, indicating a consistent operating baseline.'}</div>`:''}
+
+<div class="rh">5. Submission Performance</div>
+<div class="rp">Total submissions: <em>${n}</em> across ${roles.length} roles, ${dists.length} districts, and ${ven.length} venues. ${roles.map(ro=>`${ROLE_LABELS[ro]||ro}: ${FL.filter(r=>r.ro===ro).length}`).join(', ')}. ${wks.map(w=>`${w}: ${FL.filter(r=>r.w===w).length}`).join(', ')}.</div>
+
+<div class="rh">6. Thematic Analysis — Collaboration Improvements (Q6)</div>
+<div class="rp">${topT.length?`Analysis of open-text responses reveals three dominant improvement themes: <em>${topT[0]?.[0]}</em> (${topT[0]?.[1]} mentions, ${Math.round(100*topT[0]?.[1]/(Object.values(tm).reduce((a,b)=>a+b)||1))}%), <em>${topT[1]?.[0]||'—'}</em> (${topT[1]?.[1]||0}), and <em>${topT[2]?.[0]||'—'}</em> (${topT[2]?.[1]||0}). ${topT[0]?.[0]==='Time Management'?'The prominence of time management themes — particularly transport reimbursements and material delivery delays — indicates operational bottlenecks creating friction for site teams.':topT[0]?.[0]==='Communication'?'Communication gaps are the primary concern: respondents call for more structured site meetings, clearer role communication, and faster feedback loops from management.':topT[0]?.[0]==='Team Support'?'Team support themes dominate — respondents value collaborative working and call for stronger peer support and collective accountability structures.':'These themes represent high-leverage areas for programmatic action in the remaining weeks.'}`:'Insufficient theme data for current filter selection.'}</div>
+
+<div class="rh">7. Safeguarding</div>
+<div class="rp">${sgPct<10?`<mark>⚠ Only ${sgPct}% of respondents completed the safeguarding section (${sgA.length}/${n}).</mark> This critically low completion rate makes the safeguarding dataset non-representative. Making the issue_logged field mandatory in SurveyCTO is the single most impactful technical action for data quality.`:sgY.length>0?`${sgA.length} respondents (${sgPct}%) completed the safeguarding section, with ${sgY.length} issue${sgY.length!==1?'s':''} formally logged. All logged issues require an assigned owner and documented resolution timeline.`:`${sgA.length} respondents completed the safeguarding section with no issues logged this period. Cross-reference with site supervisors to verify this reflects actual field conditions.`}</div>
+
+<div class="rh">8. Recommendations</div>
+<div class="rp"><strong>Priority 1 — Address lowest-scoring dimension (${qL?.short||'culture dimension'}):</strong> Introduce targeted coaching prompts and structured protocols related to ${qL?.k==='q2'?'proactive challenge identification and early escalation':qL?.k==='q3'?'expanding initiative beyond assigned roles':qL?.k==='q5'?'rapid team adaptation when plans change':'improving the identified weak dimension'} in the next site visit cycle.</div>
+<div class="rp"><strong>Priority 2 — ${dR.length>=2&&(bD?.cs||0)-(wD?.cs||0)>2?'Support '+wD?.d+' with targeted intervention':'Scale practices from '+bD?.d}:</strong> ${dR.length>=2&&(bD?.cs||0)-(wD?.cs||0)>2?'Deploy a specialist coach and review site management arrangements to close the performance gap.':'Document the high-performing practices and create a shareable playbook for other districts.'}</div>
+<div class="rp"><strong>Priority 3 — ${sgPct<10?'Make issue_logged mandatory in SurveyCTO':'Improve safeguarding system uptake'}:</strong> ${sgPct<10?'The current '+sgPct+'% completion rate is inadequate. This is a system design fix — set the field as required before the next data collection round.':'Work with site teams to reduce informal WhatsApp escalation by improving the formal system — simplify the escalation form and ensure faster response times.'}</div>`;
+}
+
+// ════════════ ADMIN ════════════════════════════════════════════════════════════
+function openModal(){
+  if(IS_ADMIN){logoutAdmin();return;}
+  document.getElementById('admin-modal').classList.add('show');
+  document.getElementById('admin-pw').value='';
+  document.getElementById('modal-err').style.display='none';
+  setTimeout(()=>document.getElementById('admin-pw').focus(),100);
+}
+function closeModal(){document.getElementById('admin-modal').classList.remove('show');}
+function checkPw(){
+  if(document.getElementById('admin-pw').value===ADMIN_PASS){
+    IS_ADMIN=true; closeModal();
+    document.getElementById('adm-badge').classList.add('show');
+    document.getElementById('btn-csv').classList.add('show');
+    document.getElementById('btn-adm').textContent='🔓 Logout';
+    document.getElementById('btn-adm').classList.add('on');
+  }else{
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('admin-pw').value='';
+  }
+}
+function logoutAdmin(){
+  IS_ADMIN=false;
+  document.getElementById('adm-badge').classList.remove('show');
+  document.getElementById('btn-csv').classList.remove('show');
+  document.getElementById('btn-adm').textContent='🔐 Admin';
+  document.getElementById('btn-adm').classList.remove('on');
+}
+
+// ════════════ CSV EXPORT ═══════════════════════════════════════════════════════
+function downloadCSV(){
+  if(!IS_ADMIN) return;
+  const esc=v=>{if(v===null||v===undefined)return'';const s=String(v);return(s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;};
+  const COLS=[
+    ['d','District'],['w','Training Week'],['dt','Reporting Date'],['v','Venue'],['ro','Role'],
+    ['q1','Q1 Team Values Feedback'],['q2','Q2 Proactive Challenges'],['q3','Q3 Initiative Taking'],
+    ['q4','Q4 Comfort Expressing Ideas'],['q5','Q5 Team Adaptability'],['cs','Culture Score Overall'],
+    ['il','Issue Logged?'],['it','Issue Type'],['nl','Reason Not Logging'],
+    ['c6','Q6 Collaboration Improvements'],['ct','Q6 Theme (coded)'],
+    ['c7','Q7 Escalation System Feedback'],['c8','Q8 Unresolved Issues'],
+  ];
+  const rows=[COLS.map(([,h])=>h).join(',')];
+  FL.forEach(r=>rows.push(COLS.map(([k])=>esc(r[k])).join(',')));
+  const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`EBA2025_CultureData_${new Date().toISOString().slice(0,10)}_n${FL.length}.csv`});
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ════════════ BOOT ════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  // Show setup banner if URL is not configured
+  if(LIVE_URL.includes('PASTE_YOUR')){
+    document.getElementById('setup-banner').style.display='block';
+    document.getElementById('ovl').style.display='none';
+    document.getElementById('live-status').textContent='Not connected';
+    document.getElementById('ldot').style.background='#f87171';
+  } else {
+    loadLive();
+  }
+});
+</script>
+</body>
+</html>
